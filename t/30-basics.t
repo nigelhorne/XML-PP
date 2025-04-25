@@ -36,5 +36,24 @@ is($body->{name}, 'body', 'Fourth child is <body>');
 is($body->{attributes}{importance}, 'low', '<body> has importance attribute');
 is($body->{children}[0]{text}, "Don't forget me this weekend!", '<body> content matches');
 
-done_testing;
+my $with_self_closing = <<'XML';
+<document>
+    <line break="true" />
+    <text>Hello</text>
+</document>
+XML
 
+my $doc = $parser->parse($with_self_closing);
+ok($doc, 'Parsed document with self-closing tag');
+is($doc->{name}, 'document', 'Root is <document>');
+is(scalar @{$doc->{children}}, 2, '<document> has 2 children');
+
+my ($line, $text) = @{$doc->{children}};
+is($line->{name}, 'line', 'First child is <line>');
+is($line->{attributes}{break}, 'true', '<line> has break attribute');
+is(scalar @{$line->{children}}, 0, '<line> has no children');
+
+is($text->{name}, 'text', 'Second child is <text>');
+is($text->{children}[0]{text}, 'Hello', '<text> content matches');
+
+done_testing();

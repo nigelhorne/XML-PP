@@ -3,7 +3,7 @@ package XML::PP;
 use strict;
 use warnings;
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 sub new {
     my ($class) = @_;
@@ -19,10 +19,26 @@ sub parse {
 sub _parse_node {
     my ($xml_ref) = @_;
 
-    # Match opening tag with optional attributes
+    # Self-closing tag
+    if ($$xml_ref =~ s/^<(\w+)((?:\s+\w+="[^"]*")*)\s*\/>//) {
+        my ($tag, $attr_string) = ($1, $2 || '');
+        my %attributes;
+
+        while ($attr_string =~ /(\w+)="([^"]*)"/g) {
+            $attributes{$1} = $2;
+        }
+
+        my $node = {
+            name       => $tag,
+            attributes => \%attributes,
+            children   => [],
+        };
+        return $node;
+    }
+
+    # Standard open/close tag
     if ($$xml_ref =~ s/^<(\w+)((?:\s+\w+="[^"]*")*)>//) {
-        my $tag = $1;
-        my $attr_string = $2 || '';
+        my ($tag, $attr_string) = ($1, $2 || '');
         my %attributes;
 
         while ($attr_string =~ /(\w+)="([^"]*)"/g) {
@@ -30,12 +46,11 @@ sub _parse_node {
         }
 
         my @children;
-
         while (1) {
             if ($$xml_ref =~ s/^<\/$tag>//) {
                 last;
             }
-            elsif ($$xml_ref =~ /^<\w+/) {
+            elsif ($$xml_ref =~ /^<\w/) {
                 push @children, _parse_node($xml_ref);
             }
             elsif ($$xml_ref =~ s/^([^<]+)//) {
@@ -49,11 +64,10 @@ sub _parse_node {
         }
 
         my $node = {
-            name     => $tag,
-            children => \@children,
+            name       => $tag,
+            attributes => \%attributes,
+            children   => \@children,
         };
-        $node->{attributes} = \%attributes if %attributes;
-
         return $node;
     }
 
