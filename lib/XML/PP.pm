@@ -3,7 +3,7 @@ package XML::PP;
 use strict;
 use warnings;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 sub new {
     my ($class) = @_;
@@ -12,38 +12,53 @@ sub new {
 
 sub parse {
     my ($self, $xml) = @_;
-    $xml =~ s/^\s+|\s+$//g;  # Trim
+    $xml =~ s/^\s+|\s+$//g;
     return _parse_node(\$xml);
 }
 
 sub _parse_node {
     my ($xml_ref) = @_;
 
-    $$xml_ref =~ s/^<(\w+)>// or return;
-    my $tag = $1;
-    my @children;
+    # Match opening tag with optional attributes
+    if ($$xml_ref =~ s/^<(\w+)((?:\s+\w+="[^"]*")*)>//) {
+        my $tag = $1;
+        my $attr_string = $2 || '';
+        my %attributes;
 
-    while (1) {
-        if ($$xml_ref =~ s/^<\/$tag>//) {
-            last;
+        while ($attr_string =~ /(\w+)="([^"]*)"/g) {
+            $attributes{$1} = $2;
         }
-        elsif ($$xml_ref =~ /^<\w+>/) {
-            push @children, _parse_node($xml_ref);
+
+        my @children;
+
+        while (1) {
+            if ($$xml_ref =~ s/^<\/$tag>//) {
+                last;
+            }
+            elsif ($$xml_ref =~ /^<\w+/) {
+                push @children, _parse_node($xml_ref);
+            }
+            elsif ($$xml_ref =~ s/^([^<]+)//) {
+                my $text = $1;
+                $text =~ s/^\s+|\s+$//g;
+                push @children, { text => $text } if $text ne '';
+            }
+            else {
+                last;
+            }
         }
-        elsif ($$xml_ref =~ s/^([^<]+)//) {
-            my $text = $1;
-            $text =~ s/^\s+|\s+$//g;
-            push @children, { text => $text } if $text ne '';
-        }
-        else {
-            last;
-        }
+
+        my $node = {
+            name     => $tag,
+            children => \@children,
+        };
+        $node->{attributes} = \%attributes if %attributes;
+
+        return $node;
     }
 
-    return {
-        name     => $tag,
-        children => \@children,
-    };
+    return;
 }
 
 1;
+
