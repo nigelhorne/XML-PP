@@ -53,7 +53,7 @@ my $expected2 = {
     }
 };
 
-diag(Data::Dumper->new([$xml_pp->collapse_structure($input2)])->Dump());
+diag(Data::Dumper->new([$xml_pp->collapse_structure($input2)])->Dump()) if($ENV{'TEST_VERBOSE'});
 is_deeply($xml_pp->collapse_structure($input2), $expected2, 'Nested $xml_pp->collapse test');
 
 # --- Test 3: Multiple same-name tags become array ---

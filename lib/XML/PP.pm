@@ -212,35 +212,35 @@ Calling C<collapse_structure> will return:
 
 =cut
 
-
 sub collapse_structure {
-    my ($self, $node) = @_;
-    return {} unless ref $node eq 'HASH' && $node->{children};
+	my ($self, $node) = @_;
+	return {} unless ref $node eq 'HASH' && $node->{children};
 
-    my %result;
-    for my $child (@{ $node->{children} }) {
-        my $name = $child->{name} or next;
-        my $value;
+	my %result;
+	for my $child (@{ $node->{children} }) {
+		my $name = $child->{name} or next;
+		my $value;
 
-        if ($child->{children} && @{ $child->{children} }) {
-            $value = (@{ $child->{children} } == 1 && exists $child->{children}[0]{text})
-                ? $child->{children}[0]{text}
-                : collapse_structure($child)->{$name};
-        }
+		if ($child->{children} && @{ $child->{children} }) {
+			if (@{ $child->{children} } == 1 && exists $child->{children}[0]{text}) {
+				$value = $child->{children}[0]{text};
+			} else {
+				$value = collapse_structure($self, $child)->{$name}; # <-- Fix is here
+			}
+		}
 
-        next unless defined $value && $value ne '';
+		next unless defined $value && $value ne '';
 
-        # Handle multiple same-name children as an array
-        if (exists $result{$name}) {
-            $result{$name} = [ $result{$name} ] unless ref $result{$name} eq 'ARRAY';
-            push @{ $result{$name} }, $value;
-        } else {
-            $result{$name} = $value;
-        }
-    }
-    return { $node->{name} => \%result };
+		# Handle multiple same-name children as an array
+		if (exists $result{$name}) {
+			$result{$name} = [ $result{$name} ] unless ref $result{$name} eq 'ARRAY';
+			push @{ $result{$name} }, $value;
+		} else {
+			$result{$name} = $value;
+		}
+	}
+	return { $node->{name} => \%result };
 }
-
 
 =head2 _parse_node
 
