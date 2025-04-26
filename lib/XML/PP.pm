@@ -40,8 +40,18 @@ This module supports basic XML document parsing, including namespace handling, a
 =head2 new
 
   my $parser = XML::PP->new();
+  my $parser = XML::PP->new(strict => 1);
+  my $parser = XML::PP->new(warn_on_error => 1);
 
-Creates a new XML::PP object.
+Creates a new C<XML::PP> object.
+
+=over 4
+
+=item * C<strict> - If set to true, the parser dies when it encounters unknown entities or unescaped ampersands.
+
+=item * C<warn_on_error> - If true, the parser emits warnings for unknown or malformed XML entities. This is enabled automatically if C<strict> is enabled.
+
+=back
 
 =cut
 

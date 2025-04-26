@@ -31,8 +31,13 @@ This module supports basic XML document parsing, including namespace handling, a
 ## new
 
     my $parser = XML::PP->new();
+    my $parser = XML::PP->new(strict => 1);
+    my $parser = XML::PP->new(warn_on_error => 1);
 
-Creates a new XML::PP object.
+Creates a new `XML::PP` object.
+
+- `strict` - If set to true, the parser dies when it encounters unknown entities or unescaped ampersands.
+- `warn_on_error` - If true, the parser emits warnings for unknown or malformed XML entities. This is enabled automatically if `strict` is enabled.
 
 ## parse
 
