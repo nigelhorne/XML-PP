@@ -29,5 +29,17 @@ my $tree3 = $parser->parse($bad_ampersand_xml);
 ok defined($tree3), 'Parser did not crash on unescaped ampersand';
 is $tree3->{attributes}{title}, 'Tom & Jerry', 'Unescaped ampersand left as-is (permissive)';
 
-done_testing;
+# Strict mode: should die on unknown entity
+throws_ok {
+	my $p = XML::PP->new(strict => 1);
+	$p->parse('<root title="Tom &unknown;">bad</root>');
+} qr/Unknown or malformed XML entity/, 'Strict mode dies on unknown entity';
 
+# Strict mode: should die on unescaped ampersand
+throws_ok {
+	my $p = XML::PP->new(strict => 1);
+	$p->parse('<root title="Tom & Jerry">bad</root>');
+} qr/Unescaped ampersand/, 'Strict mode dies on unescaped ampersand';
+
+
+done_testing;

@@ -47,8 +47,10 @@ Creates a new XML::PP object.
 
 # Constructor for creating a new XML::PP object
 sub new {
-	my $class = shift;
-	return bless {}, $class;
+	my ($class, %opts) = @_;
+	return bless {
+		strict => $opts{strict} // 0,
+	}, $class;
 }
 
 =head2 parse
@@ -165,6 +167,7 @@ sub _decode_entities {
 	my ($self, $text) = @_;
 	return undef unless defined $text;
 
+	# Decode known named entities
 	$text =~ s/&lt;/</g;
 	$text =~ s/&gt;/>/g;
 	$text =~ s/&amp;/&/g;
@@ -174,8 +177,18 @@ sub _decode_entities {
 	# Decode decimal numeric entities
 	$text =~ s/&#(\d+);/chr($1)/eg;
 
-	# Decode hexadecimal numeric entities
+	# Decode hex numeric entities
 	$text =~ s/&#x([0-9a-fA-F]+);/chr(hex($1))/eg;
+
+	# Strict mode: check for unknown or unescaped &
+	if ($self->{strict}) {
+		if ($text =~ /&[^;]*;/) {
+			die "Unknown or malformed XML entity in strict mode: $text";
+		}
+		if ($text =~ /&/) {
+			die "Unescaped ampersand detected in strict mode: $text";
+		}
+	}
 
 	return $text;
 }
