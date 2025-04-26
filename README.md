@@ -4,7 +4,7 @@ XML::PP - A simple XML parser
 
 # VERSION
 
-Version 0.02
+Version 0.03
 
 # SYNOPSIS
 
@@ -38,9 +38,18 @@ This module supports basic XML document parsing, including namespace handling, a
     my $parser = XML::PP->new(warn_on_error => 1);
 
 Creates a new `XML::PP` object.
+It can take several optional arguments:
 
 - `strict` - If set to true, the parser dies when it encounters unknown entities or unescaped ampersands.
 - `warn_on_error` - If true, the parser emits warnings for unknown or malformed XML entities. This is enabled automatically if `strict` is enabled.
+- `logger`
+
+    Used for warnings and traces.
+    It can be an object that understands warn() and trace() messages,
+    such as a [Log::Log4perl](https://metacpan.org/pod/Log%3A%3ALog4perl) or [Log::Any](https://metacpan.org/pod/Log%3A%3AAny) object,
+    a reference to code,
+    a reference to an array,
+    or a filename.
 
 ## parse
 
@@ -74,7 +83,7 @@ Collapse an XML-like structure into a simplified hash (like [XML::Simple](https:
 
     my $result = collapse_structure($input);
 
-    # Output: 
+    # Output:
     # {
     #     note => {
     #         to      => 'Tove',

@@ -1,6 +1,6 @@
 Revision history for XML-PP
 
-0.03
+0.03	Sat Apr 26 15:11:21 EDT 2025
 	Handle the XML header
 	Added the logger option to new()
 
