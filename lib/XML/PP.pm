@@ -48,10 +48,18 @@ Creates a new XML::PP object.
 # Constructor for creating a new XML::PP object
 sub new {
 	my ($class, %opts) = @_;
+
+	# strict implies warn_on_error
+	if ($opts{strict}) {
+		$opts{warn_on_error} = 1;
+	}
+
 	return bless {
-		strict => $opts{strict} // 0,
+		strict        => $opts{strict}        // 0,
+		warn_on_error => $opts{warn_on_error} // 0,
 	}, $class;
 }
+
 
 =head2 parse
 
@@ -180,15 +188,28 @@ sub _decode_entities {
 	# Decode hex numeric entities
 	$text =~ s/&#x([0-9a-fA-F]+);/chr(hex($1))/eg;
 
-	# Strict mode: check for unknown or unescaped &
-	if ($self->{strict}) {
-		if ($text =~ /&[^;]*;/) {
-			die "Unknown or malformed XML entity in strict mode: $text";
+if ($text =~ /&([^;]*);/) {
+	my $entity = $1;
+	unless ($entity =~ /^(lt|gt|amp|quot|apos)$/ || $entity =~ /^#(?:x[0-9a-fA-F]+|\d+)$/) {
+		my $msg = "Unknown or malformed XML entity: &$entity;";
+		if ($self->{strict}) {
+			die $msg;
+		} elsif ($self->{warn_on_error}) {
+			warn $msg;
 		}
-		if ($text =~ /&/) {
-			die "Unescaped ampersand detected in strict mode: $text";
-		}
+		# Avoid double-warn/die by skipping next check
+		return $text;
 	}
+}
+
+if ($text =~ /&/) {
+	my $msg = "Unescaped ampersand detected: $text";
+	if ($self->{strict}) {
+		die $msg;
+	} elsif ($self->{warn_on_error}) {
+		warn $msg;
+	}
+}
 
 	return $text;
 }

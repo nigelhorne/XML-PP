@@ -41,5 +41,24 @@ throws_ok {
 	$p->parse('<root title="Tom & Jerry">bad</root>');
 } qr/Unescaped ampersand/, 'Strict mode dies on unescaped ampersand';
 
+# Warning mode: unknown entity should warn but not die
+my $warned;
+{
+	local $SIG{__WARN__} = sub { $warned = shift };
+	my $p = XML::PP->new(warn_on_error => 1);
+	my $tree = $p->parse('<root title="Tom &unknown;">bad</root>');
+	ok defined $tree, 'Parser survived unknown entity in warning mode';
+	like $warned, qr/Unknown or malformed XML entity/, 'Warning issued for unknown entity';
+}
+
+# Warning mode: unescaped & should warn
+{
+	local $SIG{__WARN__} = sub { $warned = shift };
+	my $p = XML::PP->new(warn_on_error => 1);
+	my $tree = $p->parse('<root title="Tom & Jerry">bad</root>');
+	ok defined $tree, 'Parser survived unescaped ampersand in warning mode';
+	like $warned, qr/Unescaped ampersand/, 'Warning issued for unescaped ampersand';
+}
+
 
 done_testing;
