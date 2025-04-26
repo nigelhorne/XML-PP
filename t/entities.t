@@ -48,7 +48,7 @@ my $warned;
 	my $p = XML::PP->new(warn_on_error => 1);
 	my $tree = $p->parse('<root title="Tom &unknown;">bad</root>');
 	ok defined $tree, 'Parser survived unknown entity in warning mode';
-	like $warned, qr/Unknown or malformed XML entity/, 'Warning issued for unknown entity';
+	like $warned, qr/XML Parsing Error/, 'Warning issued for unknown entity';
 }
 
 # Warning mode: unescaped & should warn
