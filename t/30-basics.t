@@ -16,7 +16,6 @@ my $xml = q{
 
 my $tree = $parser->parse($xml);
 
-diag(Data::Dumper->new([$tree])->Dump());
 ok($tree, 'Parser returned a tree');
 
 is($tree->{name}, 'note', 'Top-level tag is <note>');

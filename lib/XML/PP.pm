@@ -16,8 +16,14 @@ sub parse {
 sub _parse_node {
     my ($self, $xml_ref, $nsmap) = @_;
 
+    # Better match for tag opening
     $$xml_ref =~ s{^\s*<([^\s/>]+)([^>]*)\s*(/?)>}{}s or return;
     my ($raw_tag, $attr_string, $self_close) = ($1, $2 || '', $3);
+
+    # Handle possible trailing slash like <line break="yes"/>
+    if ($attr_string =~ s{/\s*$}{}) {
+        $self_close = 1;
+    }
 
     my ($ns, $tag) = $raw_tag =~ /^([^:]+):(.+)$/
         ? ($1, $2)
@@ -25,7 +31,7 @@ sub _parse_node {
 
     my %local_nsmap = (%$nsmap);
 
-    # First pass: xmlns declarations
+    # XMLNS declarations
     while ($attr_string =~ /(\w+)(?::(\w+))?="([^"]*)"/g) {
         my ($k1, $k2, $v) = ($1, $2, $3);
         if ($k1 eq 'xmlns' && !defined $k2) {
@@ -35,7 +41,6 @@ sub _parse_node {
         }
     }
 
-    # Second pass: regular attributes
     my %attributes;
     pos($attr_string) = 0;
     while ($attr_string =~ /(\w+)(?::(\w+))?="([^"]*)"/g) {
@@ -53,7 +58,7 @@ sub _parse_node {
         children   => [],
     };
 
-    # Self-closing tag
+    # Return immediately if self-closing tag
     return $node if $self_close;
 
     # Capture text
