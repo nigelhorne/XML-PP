@@ -171,6 +171,12 @@ sub _decode_entities {
 	$text =~ s/&quot;/"/g;
 	$text =~ s/&apos;/'/g;
 
+	# Decode decimal numeric entities
+	$text =~ s/&#(\d+);/chr($1)/eg;
+
+	# Decode hexadecimal numeric entities
+	$text =~ s/&#x([0-9a-fA-F]+);/chr(hex($1))/eg;
+
 	return $text;
 }
 
