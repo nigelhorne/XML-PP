@@ -29,5 +29,22 @@ WriteMakefile(
 		'Test::DescribeMe' => 0,
 		'Test::Most' => 0,
 		'Test::Needs' => 0,
-	}
+	},
+	META_MERGE => {	# https://perldoc.perl.org/CPAN::Meta::Spec
+		'meta-spec' => { version => 2 },
+		resources => {
+			repository => {
+				repository => 'https://github.com/nigelhorne/XML-PP',
+				type => 'git',
+				url => 'git://github.com/nigelhorne/XML-PP.git',
+				web => 'https://github.com/nigelhorne/XML-PP'
+			}, bugtracker => {
+				mailto => 'bug-XML-PP@rt.cpan.org',
+				url => 'https://github.com/nigelhorne/XML-PP/issues',
+				# web => 'https://rt.cpan.org/Public/Dist/Display.html?Name=XML-PP',
+				web => 'https://github.com/nigelhorne/XML-PP/issues'
+			}
+		},
+	},
+	MIN_PERL_VERSION	=> '5.008'
 );
