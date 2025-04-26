@@ -20,6 +20,7 @@ my $xml = q{
 my $tree = $parser->parse($xml);
 
 diag(Data::Dumper->new([$tree])->Dump()) if($ENV{'TEST_VERBOSE'});
+diag(Data::Dumper->new([XML::PP->collapse_structure($tree)])->Dump()) if($ENV{'TEST_VERBOSE'});
 
 ok($tree, 'Parser returned a tree');
 

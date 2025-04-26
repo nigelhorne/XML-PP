@@ -112,6 +112,136 @@ sub parse {
 	return $self->_parse_node(\$xml_string, {});
 }
 
+=head2 collapse_structure
+
+Collapse an XML-like structure into a simplified hash (like L<XML::Simple>).
+
+  use XML::PP;
+
+  my $input = {
+      name => 'note',
+      children => [
+          { name => 'to', children => [ { text => 'Tove' } ] },
+          { name => 'from', children => [ { text => 'Jani' } ] },
+          { name => 'heading', children => [ { text => 'Reminder' } ] },
+          { name => 'body', children => [ { text => 'Don\'t forget me this weekend!' } ] },
+      ],
+      attributes => { id => 'n1' },
+  };
+
+  my $result = collapse_structure($input);
+
+  # Output: 
+  # {
+  #     note => {
+  #         to      => 'Tove',
+  #         from    => 'Jani',
+  #         heading => 'Reminder',
+  #         body    => 'Don\'t forget me this weekend!',
+  #     }
+  # }
+
+The C<collapse_structure> subroutine takes a nested hash structure (representing an XML-like data structure) and collapses it into a simplified hash where each child element is mapped to its name as the key, and the text content is mapped as the corresponding value. The final result is wrapped in a C<note> key, which contains a hash of all child elements.
+
+This subroutine is particularly useful for flattening XML-like data into a more manageable hash format, suitable for further processing or display.
+
+C<collapse_structure> accepts a single argument:
+
+=over 4
+
+=item * C<$node> (Required)
+
+A hash reference representing a node with the following structure:
+
+  {
+      name      => 'element_name',  # Name of the element (e.g., 'note', 'to', etc.)
+      children  => [                # List of child elements
+          { name => 'child_name', children => [{ text => 'value' }] },
+          ...
+      ],
+      attributes => { ... },        # Optional attributes for the element
+      ns_uri => ... ,               # Optional namespace URI
+      ns => ... ,                   # Optional namespace
+  }
+
+The C<children> key holds an array of child elements. Each child element may have its own C<name> and C<text>, and the function will collapse all text values into key-value pairs.
+
+=back
+
+The subroutine returns a hash reference that represents the collapsed structure, where the top-level key is C<note> and its value is another hash containing the child elements' names as keys and their corresponding text values as values.
+
+For example:
+
+  {
+      note => {
+          to      => 'Tove',
+          from    => 'Jani',
+          heading => 'Reminder',
+          body    => 'Don\'t forget me this weekend!',
+      }
+  }
+
+=over 4
+
+=item Basic Example:
+
+Given the following input structure:
+
+  my $input = {
+      name => 'note',
+      children => [
+          { name => 'to', children => [ { text => 'Tove' } ] },
+          { name => 'from', children => [ { text => 'Jani' } ] },
+          { name => 'heading', children => [ { text => 'Reminder' } ] },
+          { name => 'body', children => [ { text => 'Don\'t forget me this weekend!' } ] },
+      ],
+  };
+
+Calling C<collapse_structure> will return:
+
+  {
+      note => {
+          to      => 'Tove',
+          from    => 'Jani',
+          heading => 'Reminder',
+          body    => 'Don\'t forget me this weekend!',
+      }
+  }
+
+=back
+
+=cut
+
+
+sub collapse_structure {
+    my ($self, $node) = @_;
+    return {} unless ref $node eq 'HASH' && $node->{children};
+
+    my %result;
+    for my $child (@{ $node->{children} }) {
+        my $name = $child->{name} or next;
+        my $value;
+
+        if ($child->{children} && @{ $child->{children} }) {
+            $value = (@{ $child->{children} } == 1 && exists $child->{children}[0]{text})
+                ? $child->{children}[0]{text}
+                : collapse_structure($child)->{$name};
+        }
+
+        next unless defined $value && $value ne '';
+
+        # Handle multiple same-name children as an array
+        if (exists $result{$name}) {
+            $result{$name} = [ $result{$name} ] unless ref $result{$name} eq 'ARRAY';
+            push @{ $result{$name} }, $value;
+        } else {
+            $result{$name} = $value;
+        }
+    }
+    return { $node->{name} => \%result };
+}
+
+
 =head2 _parse_node
 
   my $node = $self->_parse_node($xml_ref, $nsmap);

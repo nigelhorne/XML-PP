@@ -46,13 +46,104 @@ Creates a new `XML::PP` object.
 
     my $tree = $parser->parse($xml_string);
 
-Parses the XML string and returns a tree structure representing the XML content. The returned structure is a hash reference with the following fields:
+Parses the XML string and returns a tree structure representing the XML content.
+The returned structure is a hash reference with the following fields:
 
 - `name` - The tag name of the node.
 - `ns` - The namespace prefix (if any).
 - `ns_uri` - The namespace URI (if any).
 - `attributes` - A hash reference of attributes.
 - `children` - An array reference of child nodes (either text nodes or further elements).
+
+## collapse\_structure
+
+Collapse an XML-like structure into a simplified hash (like [XML::Simple](https://metacpan.org/pod/XML%3A%3ASimple)).
+
+    use XML::PP;
+
+    my $input = {
+        name => 'note',
+        children => [
+            { name => 'to', children => [ { text => 'Tove' } ] },
+            { name => 'from', children => [ { text => 'Jani' } ] },
+            { name => 'heading', children => [ { text => 'Reminder' } ] },
+            { name => 'body', children => [ { text => 'Don\'t forget me this weekend!' } ] },
+        ],
+        attributes => { id => 'n1' },
+    };
+
+    my $result = collapse_structure($input);
+
+    # Output: 
+    # {
+    #     note => {
+    #         to      => 'Tove',
+    #         from    => 'Jani',
+    #         heading => 'Reminder',
+    #         body    => 'Don\'t forget me this weekend!',
+    #     }
+    # }
+
+The `collapse_structure` subroutine takes a nested hash structure (representing an XML-like data structure) and collapses it into a simplified hash where each child element is mapped to its name as the key, and the text content is mapped as the corresponding value. The final result is wrapped in a `note` key, which contains a hash of all child elements.
+
+This subroutine is particularly useful for flattening XML-like data into a more manageable hash format, suitable for further processing or display.
+
+`collapse_structure` accepts a single argument:
+
+- `$node` (Required)
+
+    A hash reference representing a node with the following structure:
+
+        {
+            name      => 'element_name',  # Name of the element (e.g., 'note', 'to', etc.)
+            children  => [                # List of child elements
+                { name => 'child_name', children => [{ text => 'value' }] },
+                ...
+            ],
+            attributes => { ... },        # Optional attributes for the element
+            ns_uri => ... ,               # Optional namespace URI
+            ns => ... ,                   # Optional namespace
+        }
+
+    The `children` key holds an array of child elements. Each child element may have its own `name` and `text`, and the function will collapse all text values into key-value pairs.
+
+The subroutine returns a hash reference that represents the collapsed structure, where the top-level key is `note` and its value is another hash containing the child elements' names as keys and their corresponding text values as values.
+
+For example:
+
+    {
+        note => {
+            to      => 'Tove',
+            from    => 'Jani',
+            heading => 'Reminder',
+            body    => 'Don\'t forget me this weekend!',
+        }
+    }
+
+- Basic Example:
+
+    Given the following input structure:
+
+        my $input = {
+            name => 'note',
+            children => [
+                { name => 'to', children => [ { text => 'Tove' } ] },
+                { name => 'from', children => [ { text => 'Jani' } ] },
+                { name => 'heading', children => [ { text => 'Reminder' } ] },
+                { name => 'body', children => [ { text => 'Don\'t forget me this weekend!' } ] },
+            ],
+        };
+
+    Calling `collapse_structure` will return:
+
+        {
+            note => {
+                to      => 'Tove',
+                from    => 'Jani',
+                heading => 'Reminder',
+                body    => 'Don\'t forget me this weekend!',
+            }
+        }
 
 ## \_parse\_node
 

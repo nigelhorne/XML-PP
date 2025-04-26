@@ -6,6 +6,7 @@ MANIFEST			This list of files
 MANIFEST.SKIP
 README.md
 t/30-basics.t
+t/collapse.t
 t/entities.t
 t/eof.t
 t/eol.t
