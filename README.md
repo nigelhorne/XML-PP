@@ -2,6 +2,10 @@
 
 XML::PP - A simple XML parser
 
+# VERSION
+
+Version 0.01
+
 # SYNOPSIS
 
     use XML::PP;
@@ -15,7 +19,12 @@ XML::PP - A simple XML parser
 
 # DESCRIPTION
 
-XML::PP is a simple, lightweight XML parser written in Perl. It does not rely on external libraries like \`XML::LibXML\` and is suitable for small XML parsing tasks. This module supports basic XML document parsing, including namespace handling, attributes, and text nodes.
+For most tasks use [XML::Simple](https://metacpan.org/pod/XML%3A%3ASimple) or [XML::LibXML](https://metacpan.org/pod/XML%3A%3ALibXML).
+`XML:PP:` exists only for the most lightweight of scenarios where you can't get one of the above modules to install.
+
+`XML::PP` is a simple, lightweight XML parser written in Perl.
+It does not rely on external libraries like `XML::LibXML` and is suitable for small XML parsing tasks.
+This module supports basic XML document parsing, including namespace handling, attributes, and text nodes.
 
 # METHODS
 
@@ -31,19 +40,20 @@ Creates a new XML::PP object.
 
 Parses the XML string and returns a tree structure representing the XML content. The returned structure is a hash reference with the following fields:
 
-\- \`name\` - The tag name of the node.
-\- \`ns\` - The namespace prefix (if any).
-\- \`ns\_uri\` - The namespace URI (if any).
-\- \`attributes\` - A hash reference of attributes.
-\- \`children\` - An array reference of child nodes (either text nodes or further elements).
-
-# INTERNAL METHODS
+- `name` - The tag name of the node.
+- `ns` - The namespace prefix (if any).
+- `ns_uri` - The namespace URI (if any).
+- `attributes` - A hash reference of attributes.
+- `children` - An array reference of child nodes (either text nodes or further elements).
 
 ## \_parse\_node
 
     my $node = $self->_parse_node($xml_ref, $nsmap);
 
-Recursively parses an individual XML node. This method is used internally by the \`parse\` method. It handles the parsing of tags, attributes, text nodes, and child elements. It also manages namespaces and handles self-closing tags.
+Recursively parses an individual XML node.
+This method is used internally by the `pars`\` method.
+It handles the parsing of tags, attributes, text nodes, and child elements.
+It also manages namespaces and handles self-closing tags.
 
 # AUTHOR
 

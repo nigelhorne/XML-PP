@@ -7,6 +7,14 @@ use warnings;
 
 XML::PP - A simple XML parser
 
+=head1 VERSION
+
+Version 0.01
+
+=cut
+
+our $VERSION = '0.01';
+
 =head1 SYNOPSIS
 
     use XML::PP;
@@ -20,7 +28,12 @@ XML::PP - A simple XML parser
 
 =head1 DESCRIPTION
 
-XML::PP is a simple, lightweight XML parser written in Perl. It does not rely on external libraries like `XML::LibXML` and is suitable for small XML parsing tasks. This module supports basic XML document parsing, including namespace handling, attributes, and text nodes.
+For most tasks use L<XML::Simple> or L<XML::LibXML>.
+C<XML:PP:> exists only for the most lightweight of scenarios where you can't get one of the above modules to install.
+
+C<XML::PP> is a simple, lightweight XML parser written in Perl.
+It does not rely on external libraries like C<XML::LibXML> and is suitable for small XML parsing tasks.
+This module supports basic XML document parsing, including namespace handling, attributes, and text nodes.
 
 =head1 METHODS
 
@@ -30,48 +43,54 @@ XML::PP is a simple, lightweight XML parser written in Perl. It does not rely on
 
 Creates a new XML::PP object.
 
+=cut
+
+# Constructor for creating a new XML::PP object
+sub new {
+	my $class = shift;
+	return bless {}, $class;
+}
+
 =head2 parse
 
     my $tree = $parser->parse($xml_string);
 
 Parses the XML string and returns a tree structure representing the XML content. The returned structure is a hash reference with the following fields:
 
-- `name` - The tag name of the node.
-- `ns` - The namespace prefix (if any).
-- `ns_uri` - The namespace URI (if any).
-- `attributes` - A hash reference of attributes.
-- `children` - An array reference of child nodes (either text nodes or further elements).
+=over 4
 
-=head1 INTERNAL METHODS
+=item * C<name> - The tag name of the node.
+
+=item * C<ns> - The namespace prefix (if any).
+
+=item * C<ns_uri> - The namespace URI (if any).
+
+=item * C<attributes> - A hash reference of attributes.
+
+=item * C<children> - An array reference of child nodes (either text nodes or further elements).
+
+=back
+
+=cut
+
+# Parse the given XML string and return the root node
+sub parse {
+	my ($self, $xml_string) = @_;
+
+	$xml_string =~ s/^\s+|\s+$//g;
+	return $self->_parse_node(\$xml_string, {});
+}
 
 =head2 _parse_node
 
     my $node = $self->_parse_node($xml_ref, $nsmap);
 
-Recursively parses an individual XML node. This method is used internally by the `parse` method. It handles the parsing of tags, attributes, text nodes, and child elements. It also manages namespaces and handles self-closing tags.
-
-=head1 AUTHOR
-
-Nigel Horne, C<< <njh at nigelhorne.com> >>
-
-=head1 COPYRIGHT AND LICENSE
-
-This software is licensed under the same terms as Perl itself.
+Recursively parses an individual XML node.
+This method is used internally by the C<pars>` method.
+It handles the parsing of tags, attributes, text nodes, and child elements.
+It also manages namespaces and handles self-closing tags.
 
 =cut
-
-# Constructor for creating a new XML::PP object
-sub new {
-    my $class = shift;
-    return bless {}, $class;
-}
-
-# Parse the given XML string and return the root node
-sub parse {
-    my ($self, $xml_string) = @_;
-    $xml_string =~ s/^\s+|\s+$//g;
-    return $self->_parse_node(\$xml_string, {});
-}
 
 # Internal method to parse an individual XML node
 sub _parse_node {
@@ -141,5 +160,14 @@ sub _parse_node {
     return $node;
 }
 
-1;
+=head1 AUTHOR
 
+Nigel Horne, C<< <njh at nigelhorne.com> >>
+
+=head1 COPYRIGHT AND LICENSE
+
+This software is licensed under the same terms as Perl itself.
+
+=cut
+
+1;
