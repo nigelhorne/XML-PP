@@ -28,10 +28,13 @@ our $VERSION = '0.01';
 
 =head1 DESCRIPTION
 
-For most tasks use L<XML::Simple> or L<XML::LibXML>.
-C<XML::PP> exists only for the most lightweight of scenarios where you can't get one of the above modules to install.
+You almost certainly do not need this module,
+for most tasks use L<XML::Simple> or L<XML::LibXML>.
+C<XML::PP> exists only for the most lightweight of scenarios where you can't get one of the above modules to install,
+for example,
+CI/CD machines running Windows that get stuck with L<https://stackoverflow.com/questions/11468141/cant-load-c-strawberry-perl-site-lib-auto-xml-libxml-libxml-dll-for-module-x>.
 
-C<XML::PP> is a simple, lightweight XML parser written in Perl.
+C<XML::PP> is a simple, lightweight XML parser written in pure Perl.
 It does not rely on external libraries like C<XML::LibXML> and is suitable for small XML parsing tasks.
 This module supports basic XML document parsing, including namespace handling, attributes, and text nodes.
 
