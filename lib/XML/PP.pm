@@ -127,7 +127,7 @@ sub _parse_node {
 		my ($k1, $k2, $v) = ($1, $2, $3);
 		next if $k1 eq 'xmlns';
 		my $attr_name = defined $k2 ? "$k1:$k2" : $k1;
-		$attributes{$attr_name} = $v;
+		$attributes{$attr_name} = $self->_decode_entities($v);
 	}
 
 	my $node = {
@@ -143,11 +143,11 @@ sub _parse_node {
 
 	# Capture text
 	if ($$xml_ref =~ s{^([^<]+)}{}s) {
-		my $text = $1;
+		my $text = $self->_decode_entities($1);
 		$text =~ s/^\s+|\s+$//g;
 		push @{ $node->{children} }, { text => $text } if $text ne '';
 	}
-
+	
 	# Recursively parse children
 	while ($$xml_ref =~ /^\s*<([^\/>"][^>]*)>/) {
 		my $child = $self->_parse_node($xml_ref, \%local_nsmap);
@@ -158,6 +158,20 @@ sub _parse_node {
 	$$xml_ref =~ s{^\s*</(?:\w+:)?$tag\s*>}{}s;
 
 	return $node;
+}
+
+# Internal helper to decode XML entities
+sub _decode_entities {
+	my ($self, $text) = @_;
+	return undef unless defined $text;
+
+	$text =~ s/&lt;/</g;
+	$text =~ s/&gt;/>/g;
+	$text =~ s/&amp;/&/g;
+	$text =~ s/&quot;/"/g;
+	$text =~ s/&apos;/'/g;
+
+	return $text;
 }
 
 =head1 AUTHOR
