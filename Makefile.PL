@@ -26,12 +26,13 @@ WriteMakefile(
 	dist => $dist,
 	PREREQ_PM => {
 		'Log::Abstraction' => 0,
+		'Params::Get' => 0,
 		'Scalar::Util' => 0
 	}, TEST_REQUIRES => {
 		'Data::Dumper' => 0,
 		'Test::DescribeMe' => 0,
 		'Test::Most' => 0,
-		'Test::Needs' => 0,
+		'Test::Needs' => 0
 	}, META_MERGE => {	# https://perldoc.perl.org/CPAN::Meta::Spec
 		'meta-spec' => { version => 2 },
 		resources => {

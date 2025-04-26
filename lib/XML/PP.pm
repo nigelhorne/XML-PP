@@ -4,6 +4,7 @@ use strict;
 use warnings;
 
 use Log::Abstraction;
+use Params::Get;
 use Scalar::Util;
 
 =head1 NAME
@@ -72,18 +73,21 @@ or a filename.
 =cut
 
 # Constructor for creating a new XML::PP object
-sub new {
-	my ($class, %opts) = @_;
+sub new
+{
+	my $class = shift;
+
+	my $params = Params::Get::get_params(undef, @_);
 
 	# strict implies warn_on_error
-	if ($opts{strict}) {
-		$opts{warn_on_error} = 1;
+	if ($params->{strict}) {
+		$params->{warn_on_error} = 1;
 	}
 
 	my $self = bless {
-		strict => $opts{strict} // 0,
-		warn_on_error => $opts{warn_on_error} // 0,
-		%opts,
+		strict => $params->{strict} // 0,
+		warn_on_error => $params->{warn_on_error} // 0,
+		$params ? %{$params} : {},
 	}, $class;
 
 	if(my $logger = $self->{'logger'}) {
@@ -119,8 +123,11 @@ The returned structure is a hash reference with the following fields:
 =cut
 
 # Parse the given XML string and return the root node
-sub parse {
-	my ($self, $xml_string) = @_;
+sub parse
+{
+	my $self = shift;
+	my $params = Params::Get::get_params('xml', @_);
+	my $xml_string = $params->{'xml'};
 
 	# Check if the XML string is empty
 	# if (!$xml_string || $xml_string !~ /<\?xml/) {
@@ -130,6 +137,9 @@ sub parse {
 		return {};
 	}
 
+	if(ref($xml_string) eq 'SCALAR') {
+		$xml_string = ${$xml_string};
+	}
 	$xml_string =~ s/<\?xml.+?>//;	# Ignore the header
 
 	$xml_string =~ s/^\s+|\s+$//g;	# Trim whitespace
@@ -237,7 +247,11 @@ Calling C<collapse_structure> will return:
 =cut
 
 sub collapse_structure {
-	my ($self, $node) = @_;
+	# my ($self, $node) = @_;
+	my $self = shift;
+	my $params = Params::Get::get_params('node', \@_);
+	my $node = $params->{'node'};
+
 	return {} unless ref $node eq 'HASH' && $node->{children};
 
 	my %result;
@@ -249,7 +263,7 @@ sub collapse_structure {
 			if (@{ $child->{children} } == 1 && exists $child->{children}[0]{text}) {
 				$value = $child->{children}[0]{text};
 			} else {
-				$value = collapse_structure($self, $child)->{$name}; # <-- Fix is here
+				$value = $self->collapse_structure($child)->{$name};
 			}
 		}
 

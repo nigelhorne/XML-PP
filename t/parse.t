@@ -24,7 +24,7 @@ XML
 
 my $xml_pp = new_ok('XML::PP');
 
-my $tree = $xml_pp->collapse_structure($xml_pp->parse($xml));
+my $tree = $xml_pp->collapse_structure($xml_pp->parse(\$xml));
 ok(defined($tree));
 ok(ref($tree) eq 'HASH');
 
