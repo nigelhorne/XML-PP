@@ -52,7 +52,7 @@ Recursively parses an individual XML node. This method is used internally by the
 
 =head1 AUTHOR
 
-Your Name <yourname@example.com>
+Nigel Horne, C<< <njh at nigelhorne.com> >>
 
 =head1 COPYRIGHT AND LICENSE
 

@@ -47,7 +47,7 @@ Recursively parses an individual XML node. This method is used internally by the
 
 # AUTHOR
 
-Your Name <yourname@example.com>
+Nigel Horne, `<njh at nigelhorne.com>`
 
 # COPYRIGHT AND LICENSE
 
