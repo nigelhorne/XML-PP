@@ -406,7 +406,7 @@ sub _handle_error {
 		if($self->{'logger'}) {
 			$self->warn($error_message);
 		} else {
-			warn $error_message;	
+			warn $error_message;
 		}
 	} else {
 		if($self->{'logger'}) {

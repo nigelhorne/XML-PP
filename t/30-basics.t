@@ -6,7 +6,7 @@ use Test::Most;
 
 BEGIN { use_ok('XML::PP') }
 
-my $parser = XML::PP->new();
+my $parser = new_ok('XML::PP');
 
 my $xml = q{
 <note id="n1">

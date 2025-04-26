@@ -6,7 +6,7 @@ use Data::Dumper;
 
 BEGIN { use_ok('XML::PP') }
 
-my $xml_pp = XML::PP->new();
+my $xml_pp = new_ok('XML::PP');
 
 # --- Test 1: Basic $xml_pp->collapsing ---
 my $input1 = {
@@ -47,7 +47,7 @@ my $input2 = {
 my $expected2 = {
     note => {
         body => {
-            p      => 'Paragraph 1',
+            p => 'Paragraph 1',
             footer => 'Goodbye',
         }
     }

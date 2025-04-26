@@ -32,7 +32,7 @@ diag(Data::Dumper->new([$tree])->Dump()) if($ENV{'TEST_VERBOSE'});
 
 my $expected = {
 	config => {
-		memory_cache => { driver => 'Null'} ,
+		memory_cache => { driver => 'Null' } ,
 		disc_cache => { driver => 'Null' },
 		SiteTitle => 'Sample VWF site',
 		root_dir => '/Users/njh/src/njh/vwf'

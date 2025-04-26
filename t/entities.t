@@ -3,9 +3,10 @@
 use strict;
 use warnings;
 use Test::Most;
-use XML::PP;
 
-my $parser = XML::PP->new;
+BEGIN { use_ok('XML::PP') }
+
+my $parser = new_ok('XML::PP');
 
 # Basic named and numeric entities
 my $xml = <<'XML';
@@ -49,8 +50,8 @@ my $warned;
 	local $SIG{__WARN__} = sub { $warned = shift };
 	my $p = XML::PP->new(warn_on_error => 1);
 	my $tree = $p->parse('<root title="Tom &unknown;">bad</root>');
-	ok defined $tree, 'Parser survived unknown entity in warning mode';
-	like $warned, qr/XML Parsing Error/, 'Warning issued for unknown entity';
+	ok(defined $tree, 'Parser survived unknown entity in warning mode');
+	like($warned, qr/XML Parsing Error/, 'Warning issued for unknown entity');
 }
 
 # Warning mode: unescaped & should warn
@@ -59,7 +60,7 @@ my $warned;
 	my $p = XML::PP->new(warn_on_error => 1);
 	my $tree = $p->parse('<root title="Tom & Jerry">bad</root>');
 	ok defined $tree, 'Parser survived unescaped ampersand in warning mode';
-	like $warned, qr/Unescaped ampersand/, 'Warning issued for unescaped ampersand';
+	like($warned, qr/Unescaped ampersand/, 'Warning issued for unescaped ampersand');
 }
 
 done_testing();
