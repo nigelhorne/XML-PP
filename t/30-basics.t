@@ -3,16 +3,17 @@ use warnings;
 
 use Data::Dumper;
 use Test::Most;
-use XML::PP;
 
-my $parser = XML::PP->new;
+BEGIN { use_ok('XML::PP') }
+
+my $parser = XML::PP->new();
 
 my $xml = q{
 <note id="n1">
-  <to priority="1">Tove</to>
-  <from>Jani</from>
-  <heading>Reminder</heading>
-  <body importance="high">Don't forget me this weekend!</body>
+	<to priority="1">Tove</to>
+	<from>Jani</from>
+	<heading>Reminder</heading>
+	<body importance="high">Don't forget me this weekend!</body>
 </note>
 };
 
@@ -42,8 +43,8 @@ like($tree->{children}[3]{children}[0]{text}, qr/Don't forget me this weekend!/,
 
 my $self_closing = q{
 <document>
-  <line break="yes"/>
-  <text>Hello</text>
+	<line break="yes"/>
+	<text>Hello</text>
 </document>
 };
 
@@ -61,7 +62,7 @@ like($doc->{children}[1]{children}[0]{text}, qr/Hello/, '<text> content matches'
 
 my $namespaced = q{
 <ns:note xmlns:ns="http://example.com/ns">
-  <ns:to>Tove</ns:to>
+	<ns:to>Tove</ns:to>
 </ns:note>
 };
 
@@ -77,4 +78,3 @@ is($ns_tree->{children}[0]{ns_uri}, 'http://example.com/ns', 'Child ns URI match
 like($ns_tree->{children}[0]{children}[0]{text}, qr/Tove/, 'Child text matches');
 
 done_testing();
-

@@ -1,3 +1,8 @@
+#!/usr/bin/env perl
+
+use warnings;
+use strict;
+
 use ExtUtils::MakeMaker;
 
 my $dist = {
@@ -13,8 +18,16 @@ WriteMakefile(
 	NAME         => 'XML::PP',
 	VERSION_FROM => 'lib/XML/PP.pm',
 	AUTHOR       => 'Nigel Horne <njh@nigelhorne.com>',
-	((defined($ExtUtils::MakeMaker::VERSION) && ($ExtUtils::MakeMaker::VERSION >= 6.3002))
+	CONFIGURE_REQUIRES => {
+		'ExtUtils::MakeMaker' => 6.64,	# Minimum version for TEST_REQUIRES
+	}, ((defined($ExtUtils::MakeMaker::VERSION) && ($ExtUtils::MakeMaker::VERSION >= 6.3002))
 		? ('LICENSE'=> 'GPL')
 		: ()),
 	dist => $dist,
+	TEST_REQUIRES => {
+		'Data::Dumper' => 0,
+		'Test::DescribeMe' => 0,
+		'Test::Most' => 0,
+		'Test::Needs' => 0,
+	}
 );

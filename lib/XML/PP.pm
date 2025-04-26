@@ -68,15 +68,14 @@ sub new {
 	}
 
 	return bless {
-		strict        => $opts{strict}        // 0,
+		strict => $opts{strict} // 0,
 		warn_on_error => $opts{warn_on_error} // 0,
 	}, $class;
 }
 
-
 =head2 parse
 
-	my $tree = $parser->parse($xml_string);
+  my $tree = $parser->parse($xml_string);
 
 Parses the XML string and returns a tree structure representing the XML content. The returned structure is a hash reference with the following fields:
 
@@ -108,7 +107,7 @@ sub parse {
 		return;
 	}
 
-	$xml_string =~ s/^\s+|\s+$//g;  # Trim whitespace
+	$xml_string =~ s/^\s+|\s+$//g;	# Trim whitespace
 	return $self->_parse_node(\$xml_string, {});
 }
 
@@ -135,11 +134,11 @@ sub _parse_node {
 
 	my ($raw_tag, $attr_string, $self_close) = ($1, $2 || '', $3);
 
-	    # Check for malformed self-closing tags
-    if ($self_close && $$xml_ref !~ /^\s*<\/(?:\w+:)?$raw_tag\s*>/) {
-        $self->_handle_error("Malformed self-closing tag for <$raw_tag>");
-        return;
-    }
+	# Check for malformed self-closing tags
+	if ($self_close && $$xml_ref !~ /^\s*<\/(?:\w+:)?$raw_tag\s*>/) {
+		$self->_handle_error("Malformed self-closing tag for <$raw_tag>");
+		return;
+	}
 
 	# Handle possible trailing slash like <line break="yes"/>
 	if ($attr_string =~ s{/\s*$}{}) {
@@ -172,9 +171,9 @@ sub _parse_node {
 	}
 
 	my $node = {
-		name	 => $tag,
-		ns		 => $ns,
-		ns_uri	 => defined $ns ? $local_nsmap{$ns} : undef,
+		name => $tag,
+		ns => $ns,
+		ns_uri => defined $ns ? $local_nsmap{$ns} : undef,
 		attributes => \%attributes,
 		children => [],
 	};
@@ -203,50 +202,50 @@ sub _parse_node {
 
 # Internal helper to decode XML entities
 sub _decode_entities {
-    my ($self, $text) = @_;
-    return undef unless defined $text;
+	my ($self, $text) = @_;
 
-    # Decode known named entities
-    $text =~ s/&lt;/</g;
-    $text =~ s/&gt;/>/g;
-    $text =~ s/&amp;/&/g;
-    $text =~ s/&quot;/"/g;
-    $text =~ s/&apos;/'/g;
+	return undef unless defined $text;
 
-    # Decode decimal numeric entities
-    $text =~ s/&#(\d+);/chr($1)/eg;
+	# Decode known named entities
+	$text =~ s/&lt;/</g;
+	$text =~ s/&gt;/>/g;
+	$text =~ s/&amp;/&/g;
+	$text =~ s/&quot;/"/g;
+	$text =~ s/&apos;/'/g;
 
-    # Decode hex numeric entities
-    $text =~ s/&#x([0-9a-fA-F]+);/chr(hex($1))/eg;
+	# Decode decimal numeric entities
+	$text =~ s/&#(\d+);/chr($1)/eg;
 
-    if ($text =~ /&([^;]*);/) {
-        my $entity = $1;
-        unless ($entity =~ /^(lt|gt|amp|quot|apos)$/ || $entity =~ /^#(?:x[0-9a-fA-F]+|\d+)$/) {
-            my $msg = "Unknown or malformed XML entity: &$entity;";
-            $self->_handle_error($msg);
-        }
-    }
+	# Decode hex numeric entities
+	$text =~ s/&#x([0-9a-fA-F]+);/chr(hex($1))/eg;
 
-    if ($text =~ /&/) {
-        my $msg = "Unescaped ampersand detected: $text";
-        $self->_handle_error($msg);
-    }
+	if ($text =~ /&([^;]*);/) {
+		my $entity = $1;
+		unless ($entity =~ /^(lt|gt|amp|quot|apos)$/ || $entity =~ /^#(?:x[0-9a-fA-F]+|\d+)$/) {
+			my $msg = "Unknown or malformed XML entity: &$entity;";
+			$self->_handle_error($msg);
+		}
+	}
 
-    return $text;
+	if ($text =~ /&/) {
+		my $msg = "Unescaped ampersand detected: $text";
+		$self->_handle_error($msg);
+	}
+
+	return $text;
 }
 
-
 sub _handle_error {
-    my ($self, $message) = @_;
-    my $error_message = "XML Parsing Error: $message";
+	my ($self, $message) = @_;
+	my $error_message = "XML Parsing Error: $message";
 
-    if ($self->{strict}) {
-        die $error_message;  # Throws an error if strict mode is enabled
-    } elsif ($self->{warn_on_error}) {
-        warn $error_message;  # Otherwise, just warn
-    } else {
-        print STDERR "Warning: $error_message\n";
-    }
+	if ($self->{strict}) {
+		die $error_message;	# Throws an error if strict mode is enabled
+	} elsif ($self->{warn_on_error}) {
+		warn $error_message;	# Otherwise, just warn
+	} else {
+		print STDERR "Warning: $error_message\n";
+	}
 }
 
 =head1 AUTHOR
