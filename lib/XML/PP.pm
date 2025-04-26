@@ -17,19 +17,19 @@ our $VERSION = '0.01';
 
 =head1 SYNOPSIS
 
-    use XML::PP;
-    
-    my $parser = XML::PP->new;
-    my $xml = '<note id="1"><to priority="high">Tove</to><from>Jani</from><heading>Reminder</heading><body importance="high">Don\'t forget me this weekend!</body></note>';
-    my $tree = $parser->parse($xml);
-    
-    print $tree->{name}; # 'note'
-    print $tree->{children}[0]->{name}; # 'to'
+  use XML::PP;
+
+  my $parser = XML::PP->new;
+  my $xml = '<note id="1"><to priority="high">Tove</to><from>Jani</from><heading>Reminder</heading><body importance="high">Don\'t forget me this weekend!</body></note>';
+  my $tree = $parser->parse($xml);
+
+  print $tree->{name};	# 'note'
+  print $tree->{children}[0]->{name};	# 'to'
 
 =head1 DESCRIPTION
 
 For most tasks use L<XML::Simple> or L<XML::LibXML>.
-C<XML:PP:> exists only for the most lightweight of scenarios where you can't get one of the above modules to install.
+C<XML::PP> exists only for the most lightweight of scenarios where you can't get one of the above modules to install.
 
 C<XML::PP> is a simple, lightweight XML parser written in Perl.
 It does not rely on external libraries like C<XML::LibXML> and is suitable for small XML parsing tasks.
@@ -39,7 +39,7 @@ This module supports basic XML document parsing, including namespace handling, a
 
 =head2 new
 
-    my $parser = XML::PP->new;
+  my $parser = XML::PP->new();
 
 Creates a new XML::PP object.
 
@@ -53,7 +53,7 @@ sub new {
 
 =head2 parse
 
-    my $tree = $parser->parse($xml_string);
+	my $tree = $parser->parse($xml_string);
 
 Parses the XML string and returns a tree structure representing the XML content. The returned structure is a hash reference with the following fields:
 
@@ -83,10 +83,10 @@ sub parse {
 
 =head2 _parse_node
 
-    my $node = $self->_parse_node($xml_ref, $nsmap);
+  my $node = $self->_parse_node($xml_ref, $nsmap);
 
 Recursively parses an individual XML node.
-This method is used internally by the C<pars>` method.
+This method is used internally by the C<parse> method.
 It handles the parsing of tags, attributes, text nodes, and child elements.
 It also manages namespaces and handles self-closing tags.
 
@@ -94,79 +94,107 @@ It also manages namespaces and handles self-closing tags.
 
 # Internal method to parse an individual XML node
 sub _parse_node {
-    my ($self, $xml_ref, $nsmap) = @_;
+	my ($self, $xml_ref, $nsmap) = @_;
 
-    # Match the start of a tag (self-closing or regular)
-    $$xml_ref =~ s{^\s*<([^\s/>]+)([^>]*)\s*(/?)>}{}s or return;
-    my ($raw_tag, $attr_string, $self_close) = ($1, $2 || '', $3);
+	# Match the start of a tag (self-closing or regular)
+	$$xml_ref =~ s{^\s*<([^\s/>]+)([^>]*)\s*(/?)>}{}s or return;
+	my ($raw_tag, $attr_string, $self_close) = ($1, $2 || '', $3);
 
-    # Handle possible trailing slash like <line break="yes"/>
-    if ($attr_string =~ s{/\s*$}{}) {
-        $self_close = 1;
-    }
+	# Handle possible trailing slash like <line break="yes"/>
+	if ($attr_string =~ s{/\s*$}{}) {
+		$self_close = 1;
+	}
 
-    my ($ns, $tag) = $raw_tag =~ /^([^:]+):(.+)$/
-        ? ($1, $2)
-        : (undef, $raw_tag);
+	my ($ns, $tag) = $raw_tag =~ /^([^:]+):(.+)$/
+		? ($1, $2)
+		: (undef, $raw_tag);
 
-    my %local_nsmap = (%$nsmap);
+	my %local_nsmap = (%$nsmap);
 
-    # XMLNS declarations
-    while ($attr_string =~ /(\w+)(?::(\w+))?="([^"]*)"/g) {
-        my ($k1, $k2, $v) = ($1, $2, $3);
-        if ($k1 eq 'xmlns' && !defined $k2) {
-            $local_nsmap{''} = $v;
-        } elsif ($k1 eq 'xmlns' && defined $k2) {
-            $local_nsmap{$k2} = $v;
-        }
-    }
+	# XMLNS declarations
+	while ($attr_string =~ /(\w+)(?::(\w+))?="([^"]*)"/g) {
+		my ($k1, $k2, $v) = ($1, $2, $3);
+		if ($k1 eq 'xmlns' && !defined $k2) {
+			$local_nsmap{''} = $v;
+		} elsif ($k1 eq 'xmlns' && defined $k2) {
+			$local_nsmap{$k2} = $v;
+		}
+	}
 
-    my %attributes;
-    pos($attr_string) = 0;
-    while ($attr_string =~ /(\w+)(?::(\w+))?="([^"]*)"/g) {
-        my ($k1, $k2, $v) = ($1, $2, $3);
-        next if $k1 eq 'xmlns';
-        my $attr_name = defined $k2 ? "$k1:$k2" : $k1;
-        $attributes{$attr_name} = $v;
-    }
+	my %attributes;
+	pos($attr_string) = 0;
+	while ($attr_string =~ /(\w+)(?::(\w+))?="([^"]*)"/g) {
+		my ($k1, $k2, $v) = ($1, $2, $3);
+		next if $k1 eq 'xmlns';
+		my $attr_name = defined $k2 ? "$k1:$k2" : $k1;
+		$attributes{$attr_name} = $v;
+	}
 
-    my $node = {
-        name       => $tag,
-        ns         => $ns,
-        ns_uri     => defined $ns ? $local_nsmap{$ns} : undef,
-        attributes => \%attributes,
-        children   => [],
-    };
+	my $node = {
+		name	 => $tag,
+		ns		 => $ns,
+		ns_uri	 => defined $ns ? $local_nsmap{$ns} : undef,
+		attributes => \%attributes,
+		children => [],
+	};
 
-    # Return immediately if self-closing tag
-    return $node if $self_close;
+	# Return immediately if self-closing tag
+	return $node if $self_close;
 
-    # Capture text
-    if ($$xml_ref =~ s{^([^<]+)}{}s) {
-        my $text = $1;
-        $text =~ s/^\s+|\s+$//g;
-        push @{ $node->{children} }, { text => $text } if $text ne '';
-    }
+	# Capture text
+	if ($$xml_ref =~ s{^([^<]+)}{}s) {
+		my $text = $1;
+		$text =~ s/^\s+|\s+$//g;
+		push @{ $node->{children} }, { text => $text } if $text ne '';
+	}
 
-    # Recursively parse children
-    while ($$xml_ref =~ /^\s*<([^\/>"][^>]*)>/) {
-        my $child = $self->_parse_node($xml_ref, \%local_nsmap);
-        push @{ $node->{children} }, $child if $child;
-    }
+	# Recursively parse children
+	while ($$xml_ref =~ /^\s*<([^\/>"][^>]*)>/) {
+		my $child = $self->_parse_node($xml_ref, \%local_nsmap);
+		push @{ $node->{children} }, $child if $child;
+	}
 
-    # Consume closing tag
-    $$xml_ref =~ s{^\s*</(?:\w+:)?$tag\s*>}{}s;
+	# Consume closing tag
+	$$xml_ref =~ s{^\s*</(?:\w+:)?$tag\s*>}{}s;
 
-    return $node;
+	return $node;
 }
 
 =head1 AUTHOR
 
 Nigel Horne, C<< <njh at nigelhorne.com> >>
 
-=head1 COPYRIGHT AND LICENSE
+=head1 SEE ALSO
 
-This software is licensed under the same terms as Perl itself.
+=over 4
+
+=item * L<XML::LibXML>
+
+=item * L<XML::Simple>
+
+=back
+
+=head1 SUPPORT
+
+This module is provided as-is without any warranty.
+
+=head1 LICENSE AND COPYRIGHT
+
+Copyright 2025 Nigel Horne.
+
+Usage is subject to licence terms.
+
+The licence terms of this software are as follows:
+
+=over 4
+
+=item * Personal single user, single computer use: GPL2
+
+=item * All other users (including Commercial, Charity, Educational, Government)
+  must apply in writing for a licence for use from Nigel Horne at the
+  above e-mail.
+
+=back
 
 =cut
 
