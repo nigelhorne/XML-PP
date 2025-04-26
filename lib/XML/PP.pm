@@ -126,9 +126,12 @@ The returned structure is a hash reference with the following fields:
 sub parse
 {
 	my $self = shift;
-	my $params = Params::Get::get_params('xml', @_);
+	my $params = Params::Get::get_params('xml', \@_);
 	my $xml_string = $params->{'xml'};
 
+	if(ref($xml_string) eq 'SCALAR') {
+		$xml_string = ${$xml_string};
+	}
 	# Check if the XML string is empty
 	# if (!$xml_string || $xml_string !~ /<\?xml/) {
 		# $self->_handle_error("Invalid or empty XML document provided");
@@ -137,9 +140,6 @@ sub parse
 		return {};
 	}
 
-	if(ref($xml_string) eq 'SCALAR') {
-		$xml_string = ${$xml_string};
-	}
 	$xml_string =~ s/<\?xml.+?>//;	# Ignore the header
 
 	$xml_string =~ s/^\s+|\s+$//g;	# Trim whitespace
