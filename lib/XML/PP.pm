@@ -13,11 +13,11 @@ XML::PP - A simple XML parser
 
 =head1 VERSION
 
-Version 0.03
+Version 0.04
 
 =cut
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 =head1 SYNOPSIS
 
@@ -80,7 +80,7 @@ sub new
 	my $params = Params::Get::get_params(undef, @_);
 
 	# strict implies warn_on_error
-	if ($params->{strict}) {
+	if($params->{strict}) {
 		$params->{warn_on_error} = 1;
 	}
 
