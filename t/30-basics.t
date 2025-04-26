@@ -1,5 +1,7 @@
 use strict;
 use warnings;
+
+use Data::Dumper;
 use Test::Most;
 use XML::PP;
 
@@ -15,6 +17,8 @@ my $xml = q{
 };
 
 my $tree = $parser->parse($xml);
+
+diag(Data::Dumper->new([$tree])->Dump()) if($ENV{'TEST_VERBOSE'});
 
 ok($tree, 'Parser returned a tree');
 
