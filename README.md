@@ -10,7 +10,7 @@ Version 0.01
 
     use XML::PP;
 
-    my $parser = XML::PP->new;
+    my $parser = XML::PP->new();
     my $xml = '<note id="1"><to priority="high">Tove</to><from>Jani</from><heading>Reminder</heading><body importance="high">Don\'t forget me this weekend!</body></note>';
     my $tree = $parser->parse($xml);
 
@@ -44,7 +44,7 @@ Creates a new `XML::PP` object.
 
 ## parse
 
-        my $tree = $parser->parse($xml_string);
+    my $tree = $parser->parse($xml_string);
 
 Parses the XML string and returns a tree structure representing the XML content. The returned structure is a hash reference with the following fields:
 

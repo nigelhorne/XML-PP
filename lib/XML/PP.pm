@@ -19,7 +19,7 @@ our $VERSION = '0.01';
 
   use XML::PP;
 
-  my $parser = XML::PP->new;
+  my $parser = XML::PP->new();
   my $xml = '<note id="1"><to priority="high">Tove</to><from>Jani</from><heading>Reminder</heading><body importance="high">Don\'t forget me this weekend!</body></note>';
   my $tree = $parser->parse($xml);
 
@@ -77,7 +77,8 @@ sub new {
 
   my $tree = $parser->parse($xml_string);
 
-Parses the XML string and returns a tree structure representing the XML content. The returned structure is a hash reference with the following fields:
+Parses the XML string and returns a tree structure representing the XML content.
+The returned structure is a hash reference with the following fields:
 
 =over 4
 
@@ -128,7 +129,7 @@ sub _parse_node {
 
 	# Match the start of a tag (self-closing or regular)
 	$$xml_ref =~ s{^\s*<([^\s/>]+)([^>]*)\s*(/?)>}{}s or do {
-		$self->_handle_error("Expected a valid XML tag, but none found at position: " . pos($$xml_ref));
+		$self->_handle_error('Expected a valid XML tag, but none found at position: ' . pos($$xml_ref));
 		return;
 	};
 
@@ -237,7 +238,7 @@ sub _decode_entities {
 
 sub _handle_error {
 	my ($self, $message) = @_;
-	my $error_message = "XML Parsing Error: $message";
+	my $error_message = __PACKAGE__ . ": XML Parsing Error: $message";
 
 	if ($self->{strict}) {
 		die $error_message;	# Throws an error if strict mode is enabled
