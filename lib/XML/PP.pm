@@ -105,8 +105,10 @@ sub parse {
 		# $self->_handle_error("Invalid or empty XML document provided");
 	if (!$xml_string) {
 		# $self->_handle_error("Empty XML document provided");
-		return;
+		return {};
 	}
+
+	$xml_string =~ s/<\?xml.+?>//;	# Ignore the header
 
 	$xml_string =~ s/^\s+|\s+$//g;	# Trim whitespace
 	return $self->_parse_node(\$xml_string, {});

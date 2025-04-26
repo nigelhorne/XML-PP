@@ -10,5 +10,7 @@ t/collapse.t
 t/entities.t
 t/eof.t
 t/eol.t
+t/parse.t
 t/pod-cm.t
+t/pod-coverage.t
 t/pod-synopsis.t
