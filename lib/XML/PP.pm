@@ -3,6 +3,9 @@ package XML::PP;
 use strict;
 use warnings;
 
+use Log::Abstraction;
+use Scalar::Util;
+
 =head1 NAME
 
 XML::PP - A simple XML parser
@@ -47,12 +50,22 @@ This module supports basic XML document parsing, including namespace handling, a
   my $parser = XML::PP->new(warn_on_error => 1);
 
 Creates a new C<XML::PP> object.
+It can take several optional arguments:
 
 =over 4
 
 =item * C<strict> - If set to true, the parser dies when it encounters unknown entities or unescaped ampersands.
 
 =item * C<warn_on_error> - If true, the parser emits warnings for unknown or malformed XML entities. This is enabled automatically if C<strict> is enabled.
+
+=item * C<logger>
+
+Used for warnings and traces.
+It can be an object that understands warn() and trace() messages,
+such as a L<Log::Log4perl> or L<Log::Any> object,
+a reference to code,
+a reference to an array,
+or a filename.
 
 =back
 
@@ -67,10 +80,19 @@ sub new {
 		$opts{warn_on_error} = 1;
 	}
 
-	return bless {
+	my $self = bless {
 		strict => $opts{strict} // 0,
 		warn_on_error => $opts{warn_on_error} // 0,
+		%opts,
 	}, $class;
+
+	if(my $logger = $self->{'logger'}) {
+		if(!Scalar::Util::blessed($logger)) {
+			$self->{'logger'} = Log::Abstraction->new($logger);
+		}
+	}
+
+	return $self;
 }
 
 =head2 parse
@@ -370,14 +392,28 @@ sub _decode_entities {
 
 sub _handle_error {
 	my ($self, $message) = @_;
+
 	my $error_message = __PACKAGE__ . ": XML Parsing Error: $message";
 
-	if ($self->{strict}) {
-		die $error_message;	# Throws an error if strict mode is enabled
+	if($self->{strict}) {
+		# Throws an error if strict mode is enabled
+		if($self->{'logger'}) {
+			$self->fatal($error_message);
+		}
+		die $error_message;
 	} elsif ($self->{warn_on_error}) {
-		warn $error_message;	# Otherwise, just warn
+		# Otherwise, just warn
+		if($self->{'logger'}) {
+			$self->warn($error_message);
+		} else {
+			warn $error_message;	
+		}
 	} else {
-		print STDERR "Warning: $error_message\n";
+		if($self->{'logger'}) {
+			$self->notice($error_message);
+		} else {
+			print STDERR "Warning: $error_message\n";
+		}
 	}
 }
 
