@@ -1,22 +1,83 @@
 package XML::PP;
+
 use strict;
 use warnings;
 
+=head1 NAME
+
+XML::PP - A simple XML parser
+
+=head1 SYNOPSIS
+
+    use XML::PP;
+    
+    my $parser = XML::PP->new;
+    my $xml = '<note id="1"><to priority="high">Tove</to><from>Jani</from><heading>Reminder</heading><body importance="high">Don\'t forget me this weekend!</body></note>';
+    my $tree = $parser->parse($xml);
+    
+    print $tree->{name}; # 'note'
+    print $tree->{children}[0]->{name}; # 'to'
+
+=head1 DESCRIPTION
+
+XML::PP is a simple, lightweight XML parser written in Perl. It does not rely on external libraries like `XML::LibXML` and is suitable for small XML parsing tasks. This module supports basic XML document parsing, including namespace handling, attributes, and text nodes.
+
+=head1 METHODS
+
+=head2 new
+
+    my $parser = XML::PP->new;
+
+Creates a new XML::PP object.
+
+=head2 parse
+
+    my $tree = $parser->parse($xml_string);
+
+Parses the XML string and returns a tree structure representing the XML content. The returned structure is a hash reference with the following fields:
+
+- `name` - The tag name of the node.
+- `ns` - The namespace prefix (if any).
+- `ns_uri` - The namespace URI (if any).
+- `attributes` - A hash reference of attributes.
+- `children` - An array reference of child nodes (either text nodes or further elements).
+
+=head1 INTERNAL METHODS
+
+=head2 _parse_node
+
+    my $node = $self->_parse_node($xml_ref, $nsmap);
+
+Recursively parses an individual XML node. This method is used internally by the `parse` method. It handles the parsing of tags, attributes, text nodes, and child elements. It also manages namespaces and handles self-closing tags.
+
+=head1 AUTHOR
+
+Your Name <yourname@example.com>
+
+=head1 COPYRIGHT AND LICENSE
+
+This software is licensed under the same terms as Perl itself.
+
+=cut
+
+# Constructor for creating a new XML::PP object
 sub new {
     my $class = shift;
     return bless {}, $class;
 }
 
+# Parse the given XML string and return the root node
 sub parse {
     my ($self, $xml_string) = @_;
     $xml_string =~ s/^\s+|\s+$//g;
     return $self->_parse_node(\$xml_string, {});
 }
 
+# Internal method to parse an individual XML node
 sub _parse_node {
     my ($self, $xml_ref, $nsmap) = @_;
 
-    # Better match for tag opening
+    # Match the start of a tag (self-closing or regular)
     $$xml_ref =~ s{^\s*<([^\s/>]+)([^>]*)\s*(/?)>}{}s or return;
     my ($raw_tag, $attr_string, $self_close) = ($1, $2 || '', $3);
 
