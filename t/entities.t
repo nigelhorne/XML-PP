@@ -1,3 +1,5 @@
+#!/usr/bin/env perl
+
 use strict;
 use warnings;
 use Test::Most;
@@ -60,5 +62,4 @@ my $warned;
 	like $warned, qr/Unescaped ampersand/, 'Warning issued for unescaped ampersand';
 }
 
-
-done_testing;
+done_testing();

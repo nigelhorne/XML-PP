@@ -185,7 +185,7 @@ sub _parse_node {
 		$text =~ s/^\s+|\s+$//g;
 		push @{ $node->{children} }, { text => $text } if $text ne '';
 	}
-	
+
 	# Recursively parse children
 	while ($$xml_ref =~ /^\s*<([^\/>"][^>]*)>/) {
 		my $child = $self->_parse_node($xml_ref, \%local_nsmap);
@@ -236,7 +236,7 @@ sub _decode_entities {
 sub _handle_error {
     my ($self, $message) = @_;
     my $error_message = "XML Parsing Error: $message";
-    
+
     if ($self->{strict}) {
         die $error_message;  # Throws an error if strict mode is enabled
     } elsif ($self->{warn_on_error}) {
