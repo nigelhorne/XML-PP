@@ -94,4 +94,3 @@ is_deeply($xml_pp->collapse_structure($input4), $expected4, 'Skipping empty node
 
 # --- Done ---
 done_testing();
-

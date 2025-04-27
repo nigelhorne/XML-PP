@@ -137,7 +137,7 @@ sub parse
 		return {};
 	}
 
-	$xml_string =~ s/<\?xml.+?>//;	# Ignore the header
+	$xml_string =~ s/<\?xml.+\?>//;	# Ignore the header
 
 	$xml_string =~ s/^\s+|\s+$//g;	# Trim whitespace
 	return $self->_parse_node(\$xml_string, {});
