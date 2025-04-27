@@ -76,8 +76,7 @@ or a filename.
 sub new
 {
 	my $class = shift;
-
-	my $params = Params::Get::get_params(undef, @_);
+	my $params = Params::Get::get_params(undef, @_) || {};
 
 	# strict implies warn_on_error
 	if($params->{strict}) {
@@ -85,9 +84,7 @@ sub new
 	}
 
 	my $self = bless {
-		strict => $params->{strict} // 0,
-		warn_on_error => $params->{warn_on_error} // 0,
-		$params ? %{$params} : {},
+		%{$params}
 	}, $class;
 
 	if(my $logger = $self->{'logger'}) {
