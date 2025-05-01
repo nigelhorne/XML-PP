@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use Log::Abstraction;
-use Params::Get;
+use Params::Get 0.04;
 use Scalar::Util;
 
 =head1 NAME
@@ -291,7 +291,7 @@ sub _parse_node {
 	my ($self, $xml_ref, $nsmap) = @_;
 
 	if(!defined($xml_ref)) {
-		die 'BUG: _parse_node, xml_ref not defined':
+		die 'BUG: _parse_node, xml_ref not defined';
 	}
 
 	# Match the start of a tag (self-closing or regular)
