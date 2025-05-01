@@ -83,9 +83,7 @@ sub new
 		$params->{warn_on_error} = 1;
 	}
 
-	my $self = bless {
-		%{$params}
-	}, $class;
+	my $self = bless { %{$params} }, $class;
 
 	if(my $logger = $self->{'logger'}) {
 		if(!Scalar::Util::blessed($logger)) {
