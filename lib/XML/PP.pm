@@ -83,9 +83,7 @@ sub new
 		$params->{warn_on_error} = 1;
 	}
 
-	my $self = bless {
-		%{$params}
-	}, $class;
+	my $self = bless { %{$params} }, $class;
 
 	if(my $logger = $self->{'logger'}) {
 		if(!Scalar::Util::blessed($logger)) {
@@ -291,6 +289,10 @@ It also manages namespaces and handles self-closing tags.
 # Internal method to parse an individual XML node
 sub _parse_node {
 	my ($self, $xml_ref, $nsmap) = @_;
+
+	if(!defined($xml_ref)) {
+		die 'BUG: _parse_node, xml_ref not defined':
+	}
 
 	# Match the start of a tag (self-closing or regular)
 	$$xml_ref =~ s{^\s*<([^\s/>]+)([^>]*)\s*(/?)>}{}s or do {
