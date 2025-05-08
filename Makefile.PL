@@ -25,7 +25,6 @@ WriteMakefile(
 		: ()),
 	dist => $dist,
 	PREREQ_PM => {
-		'Log::Abstraction' => 0,
 		'Params::Get' => 0.04,
 		'Scalar::Util' => 0
 	}, TEST_REQUIRES => {

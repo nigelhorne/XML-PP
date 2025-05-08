@@ -3,7 +3,6 @@ package XML::PP;
 use strict;
 use warnings;
 
-use Log::Abstraction;
 use Params::Get 0.04;
 use Scalar::Util;
 
@@ -87,6 +86,13 @@ sub new
 
 	if(my $logger = $self->{'logger'}) {
 		if(!Scalar::Util::blessed($logger)) {
+			# Don't "use" at the top, because of circular dependancy:
+			#	Log::Abstraction->Config::Abstraction->XML::PP
+			eval { require Log::Abstraction };
+			if($@) {
+				die $@;
+			}
+			Log::Abstraction->import();
 			$self->{'logger'} = Log::Abstraction->new($logger);
 		}
 	}
