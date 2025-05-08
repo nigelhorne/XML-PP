@@ -1,8 +1,8 @@
 use strict;
 use warnings;
-use Test::More;
 
 use Data::Dumper;
+use Test::Most;
 
 BEGIN { use_ok('XML::PP') }
 
