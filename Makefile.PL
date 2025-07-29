@@ -15,14 +15,15 @@ if($^O eq 'darwin') {
 }
 
 WriteMakefile(
-	NAME         => 'XML::PP',
+	NAME => 'XML::PP',
 	VERSION_FROM => 'lib/XML/PP.pm',
-	AUTHOR       => 'Nigel Horne <njh@nigelhorne.com>',
+	AUTHOR => 'Nigel Horne <njh@nigelhorne.com>',
 	CONFIGURE_REQUIRES => {
 		'ExtUtils::MakeMaker' => 6.64,	# Minimum version for TEST_REQUIRES
 	}, ((defined($ExtUtils::MakeMaker::VERSION) && ($ExtUtils::MakeMaker::VERSION >= 6.3002))
 		? ('LICENSE'=> 'GPL')
 		: ()),
+	clean => { FILES => 'XML-PP-*' },
 	dist => $dist,
 	PREREQ_PM => {
 		'Params::Get' => 0.04,
@@ -48,5 +49,5 @@ WriteMakefile(
 			}
 		},
 	},
-	MIN_PERL_VERSION	=> '5.008'
+	MIN_PERL_VERSION => '5.008'
 );
