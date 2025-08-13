@@ -3,8 +3,9 @@ package XML::PP;
 use strict;
 use warnings;
 
-use Params::Get 0.04;
+use Params::Get 0.13;
 use Scalar::Util;
+use Return::Set;
 
 =head1 NAME
 
@@ -372,7 +373,7 @@ sub _parse_node {
 	# Consume closing tag
 	$$xml_ref =~ s{^\s*</(?:\w+:)?$tag\s*>}{}s;
 
-	return $node;
+	return Return::Set::set_return($node, { 'type' => 'hashref', 'min' => 1 });
 }
 
 # Internal helper to decode XML entities

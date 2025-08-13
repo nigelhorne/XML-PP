@@ -26,13 +26,15 @@ WriteMakefile(
 	clean => { FILES => 'XML-PP-*' },
 	dist => $dist,
 	PREREQ_PM => {
-		'Params::Get' => 0.04,
+		'Params::Get' => 0.13,
+		'Return::Set' => 0,
 		'Scalar::Util' => 0
 	}, TEST_REQUIRES => {
 		'Data::Dumper' => 0,
 		'Test::DescribeMe' => 0,
 		'Test::Most' => 0,
-		'Test::Needs' => 0
+		'Test::Needs' => 0,
+		'Test::Returns' => 0
 	}, META_MERGE => {	# https://perldoc.perl.org/CPAN::Meta::Spec
 		'meta-spec' => { version => 2 },
 		resources => {
@@ -43,9 +45,10 @@ WriteMakefile(
 				web => 'https://github.com/nigelhorne/XML-PP'
 			}, bugtracker => {
 				mailto => 'bug-XML-PP@rt.cpan.org',
-				url => 'https://github.com/nigelhorne/XML-PP/issues',
-				# web => 'https://rt.cpan.org/Public/Dist/Display.html?Name=XML-PP',
-				web => 'https://github.com/nigelhorne/XML-PP/issues'
+				url => 'https://rt.cpan.org/Public/Dist/Display.html?Name=XML-PP',
+				web => 'https://rt.cpan.org/Public/Dist/Display.html?Name=XML-PP',
+				# url => 'https://github.com/nigelhorne/XML-PP/issues',
+				# web => 'https://github.com/nigelhorne/XML-PP/issues'
 			}
 		},
 	},
