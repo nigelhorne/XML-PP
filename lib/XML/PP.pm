@@ -143,6 +143,7 @@ sub parse
 		return {};
 	}
 
+	$xml_string =~ s/<!--.*?-->//sg;	# Ignore comments
 	$xml_string =~ s/<\?xml.+\?>//;	# Ignore the header
 
 	$xml_string =~ s/^\s+|\s+$//g;	# Trim whitespace
@@ -300,6 +301,9 @@ sub _parse_node {
 	my ($self, $xml_ref, $nsmap) = @_;
 
 	if(!defined($xml_ref)) {
+		if($self->{'logger'}) {
+			$self->{'logger'}->fatal('BUG: _parse_node, xml_ref not defined');
+		}
 		die 'BUG: _parse_node, xml_ref not defined';
 	}
 
@@ -312,13 +316,13 @@ sub _parse_node {
 	my ($raw_tag, $attr_string, $self_close) = ($1, $2 || '', $3);
 
 	# Check for malformed self-closing tags
-	if ($self_close && $$xml_ref !~ /^\s*<\/(?:\w+:)?$raw_tag\s*>/) {
+	if($self_close && $$xml_ref !~ /^\s*<\/(?:\w+:)?$raw_tag\s*>/) {
 		$self->_handle_error("Malformed self-closing tag for <$raw_tag>");
 		return;
 	}
 
 	# Handle possible trailing slash like <line break="yes"/>
-	if ($attr_string =~ s{/\s*$}{}) {
+	if($attr_string =~ s{/\s*$}{}) {
 		$self_close = 1;
 	}
 
@@ -420,19 +424,19 @@ sub _handle_error {
 	if($self->{strict}) {
 		# Throws an error if strict mode is enabled
 		if($self->{'logger'}) {
-			$self->fatal($error_message);
+			$self->{'logger'}->fatal($error_message);
 		}
 		die $error_message;
 	} elsif ($self->{warn_on_error}) {
 		# Otherwise, just warn
 		if($self->{'logger'}) {
-			$self->warn($error_message);
+			$self->{'logger'}->warn($error_message);
 		} else {
 			warn $error_message;
 		}
 	} else {
 		if($self->{'logger'}) {
-			$self->notice($error_message);
+			$self->{'logger'}->notice($error_message);
 		} else {
 			print STDERR "Warning: $error_message\n";
 		}

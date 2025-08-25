@@ -15,6 +15,7 @@ my $xml = <<'XML';
 	<memory_cache>
 		<driver>Null</driver>
 	</memory_cache>
+	<!-- This comment should be ignored -->
 	<disc_cache>
 		<driver>Null</driver>
 	</disc_cache>

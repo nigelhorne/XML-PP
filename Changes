@@ -2,6 +2,7 @@ Revision history for XML-PP
 
 0.07
 	Use Return::Set to verify correct output type
+	Ignore comments in the XML
 
 0.06	Thu May 22 13:44:50 EDT 2025
 	Use positional parameters when parsing children
