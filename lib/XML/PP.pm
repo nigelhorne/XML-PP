@@ -32,9 +32,10 @@ our $VERSION = '0.06';
 
 =head1 DESCRIPTION
 
-You almost certainly do not need this module,
-for most tasks use L<XML::Simple> or L<XML::LibXML>.
-C<XML::PP> exists only for the most lightweight of scenarios where you can't get one of the above modules to install,
+You almost certainly do not need this module.
+For most tasks,
+use L<XML::Simple> or L<XML::LibXML>.
+C<XML::PP> exists only for the most lightweight scenarios where you can't get one of the above modules to install,
 for example,
 CI/CD machines running Windows that get stuck with L<https://stackoverflow.com/questions/11468141/cant-load-c-strawberry-perl-site-lib-auto-xml-libxml-libxml-dll-for-module-x>.
 
