@@ -1,3 +1,4 @@
+bin/xmlpp-cli
 Changes
 lib/XML/PP.pm
 LICENSE
