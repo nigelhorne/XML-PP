@@ -23,6 +23,7 @@ WriteMakefile(
 	}, ((defined($ExtUtils::MakeMaker::VERSION) && ($ExtUtils::MakeMaker::VERSION >= 6.3002))
 		? ('LICENSE'=> 'GPL')
 		: ()),
+	EXE_FILES => [ 'bin/xmlpp-cli' ],
 	clean => { FILES => 'XML-PP-*' },
 	dist => $dist,
 	PREREQ_PM => {
