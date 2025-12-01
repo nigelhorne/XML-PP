@@ -344,11 +344,14 @@ sub _parse_node {
 
 	my %attributes;
 	pos($attr_string) = 0;
-	while ($attr_string =~ /(\w+)(?::(\w+))?="([^"]*)"/g) {
-		my ($k1, $k2, $v) = ($1, $2, $3);
-		next if $k1 eq 'xmlns';
-		my $attr_name = defined $k2 ? "$k1:$k2" : $k1;
-		$attributes{$attr_name} = $self->_decode_entities($v);
+	# Require valid attribute syntax (name="value"), fail silently on broken ones
+	while ($attr_string =~ /([A-Za-z_:][A-Za-z0-9_.:-]*)="([^"]*)"/g) {
+		my ($attr, $v) = ($1, $2);
+
+		# Skip xmlns declarations (already processed earlier)
+		next if $attr =~ /^xmlns(?::|$)/;
+
+		$attributes{$attr} = $self->_decode_entities($v);
 	}
 
 	my $node = {
