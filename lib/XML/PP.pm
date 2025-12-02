@@ -344,13 +344,16 @@ sub _parse_node {
 
 	my %attributes;
 	pos($attr_string) = 0;
-	# Require valid attribute syntax (name="value"), fail silently on broken ones
-	while ($attr_string =~ /([A-Za-z_:][A-Za-z0-9_.:-]*)="([^"]*)"/g) {
-		my ($attr, $v) = ($1, $2);
 
-		# Skip xmlns declarations (already processed earlier)
+	# Accept name="value" and name='value' (value captured lazily, same quote used to open/close)
+	# Attribute name follows XML Name-ish rules: start with letter/underscore/colon, then letters/digits/._:-
+	while ($attr_string =~ /([A-Za-z_:][-A-Za-z0-9_.:]*)\s*=\s*(['"])(.*?)\2/g) {
+		my ($attr, $quote, $v) = ($1, $2, $3);
+
+		# Skip xmlns declarations (already handled)
 		next if $attr =~ /^xmlns(?::|$)/;
 
+		# Decode XML entities inside attribute values
 		$attributes{$attr} = $self->_decode_entities($v);
 	}
 
