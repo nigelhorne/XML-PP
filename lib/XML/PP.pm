@@ -342,6 +342,21 @@ sub _parse_node {
 		}
 	}
 
+	# Normalize whitespace between attributes but not inside quotes
+	# - Collapse run of whitespace to one space
+	# - Remove leading/trailing whitespace
+	# - Preserve quoted attribute values
+	{
+		my $tmp = $attr_string;
+
+		# Replace all whitespace sequences outside of quotes with a single space
+		# This works because it alternates: quoted | non-quoted
+		my @parts = $tmp =~ /"[^"]*"|'[^']*'|[^\s"'']+/g;
+
+		# Rejoin non-quoted segments with a single space
+		$attr_string = join(' ', @parts);
+	}
+
 	my %attributes;
 	pos($attr_string) = 0;
 
