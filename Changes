@@ -7,6 +7,7 @@ Revision history for XML-PP
 	Improved attribute parsing
 	Accept single-quoted attributes
 	Normalize whitespace between attributes
+	Added testing dashboard
 
 0.06	Thu May 22 13:44:50 EDT 2025
 	Use positional parameters when parsing children
