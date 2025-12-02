@@ -170,6 +170,7 @@ Nigel Horne, `<njh at nigelhorne.com>`
 
 # SEE ALSO
 
+- Test coverage report: [https://nigelhorne.github.io/XML-PP/coverage/](https://nigelhorne.github.io/XML-PP/coverage/)
 - [XML::LibXML](https://metacpan.org/pod/XML%3A%3ALibXML)
 - [XML::Simple](https://metacpan.org/pod/XML%3A%3ASimple)
 

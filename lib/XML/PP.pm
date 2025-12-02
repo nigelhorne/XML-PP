@@ -472,6 +472,8 @@ Nigel Horne, C<< <njh at nigelhorne.com> >>
 
 =over 4
 
+=item * Test coverage report: L<https://nigelhorne.github.io/XML-PP/coverage/>
+
 =item * L<XML::LibXML>
 
 =item * L<XML::Simple>
