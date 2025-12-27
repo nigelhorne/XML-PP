@@ -1,0 +1,327 @@
+{
+   "runs" : [
+      {
+         "OS" : "linux",
+         "abstract" : "unknown",
+         "dir" : "/home/runner/work/XML-PP/XML-PP",
+         "finish" : 1766802998.06107,
+         "name" : "XML-PP",
+         "perl" : "5.40.3",
+         "run" : "-e",
+         "start" : 1766802998.06073,
+         "version" : "0.07"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "unknown",
+         "dir" : "/home/runner/work/XML-PP/XML-PP",
+         "finish" : 1766802998.22737,
+         "name" : "XML-PP",
+         "perl" : "5.40.3",
+         "run" : "-e",
+         "start" : 1766802998.2271,
+         "version" : "0.07"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "unknown",
+         "dir" : "/home/runner/work/XML-PP/XML-PP",
+         "finish" : 1766802998.39334,
+         "name" : "XML-PP",
+         "perl" : "5.40.3",
+         "run" : "-e",
+         "start" : 1766802998.39295,
+         "version" : "0.07"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "unknown",
+         "dir" : "/home/runner/work/XML-PP/XML-PP",
+         "finish" : 1766802998.56436,
+         "name" : "XML-PP",
+         "perl" : "5.40.3",
+         "run" : "-e",
+         "start" : 1766802998.56398,
+         "version" : "0.07"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "unknown",
+         "dir" : "/home/runner/work/XML-PP/XML-PP",
+         "finish" : 1766802998.72837,
+         "name" : "XML-PP",
+         "perl" : "5.40.3",
+         "run" : "-e",
+         "start" : 1766802998.7281,
+         "version" : "0.07"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "unknown",
+         "dir" : "/home/runner/work/XML-PP/XML-PP",
+         "finish" : 1766802998.89288,
+         "name" : "XML-PP",
+         "perl" : "5.40.3",
+         "run" : "-e",
+         "start" : 1766802998.89264,
+         "version" : "0.07"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "unknown",
+         "dir" : "/home/runner/work/XML-PP/XML-PP",
+         "finish" : 1766802999.05711,
+         "name" : "XML-PP",
+         "perl" : "5.40.3",
+         "run" : "-e",
+         "start" : 1766802999.05685,
+         "version" : "0.07"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "unknown",
+         "dir" : "/home/runner/work/XML-PP/XML-PP",
+         "finish" : 1766802999.22008,
+         "name" : "XML-PP",
+         "perl" : "5.40.3",
+         "run" : "-e",
+         "start" : 1766802999.21983,
+         "version" : "0.07"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "unknown",
+         "dir" : "/home/runner/work/XML-PP/XML-PP",
+         "finish" : 1766802999.39938,
+         "name" : "XML-PP",
+         "perl" : "5.40.3",
+         "run" : "-e",
+         "start" : 1766802999.39082,
+         "version" : "0.07"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "unknown",
+         "dir" : "/home/runner/work/XML-PP/XML-PP",
+         "finish" : 1766802999.62246,
+         "name" : "XML-PP",
+         "perl" : "5.40.3",
+         "run" : "-e",
+         "start" : 1766802999.62185,
+         "version" : "0.07"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "unknown",
+         "dir" : "/home/runner/work/XML-PP/XML-PP",
+         "finish" : 1766803002.99543,
+         "name" : "XML-PP",
+         "perl" : "5.40.3",
+         "run" : "-e",
+         "start" : 1766802999.8184,
+         "version" : "0.07"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "unknown",
+         "dir" : "/home/runner/work/XML-PP/XML-PP",
+         "finish" : 1766802999.96217,
+         "name" : "XML-PP",
+         "perl" : "5.40.3",
+         "run" : "-e",
+         "start" : 1766802999.96203,
+         "version" : "0.07"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "unknown",
+         "dir" : "/home/runner/work/XML-PP/XML-PP",
+         "finish" : 1766803000.25398,
+         "name" : "XML-PP",
+         "perl" : "5.40.3",
+         "run" : "t/30-basics.t",
+         "start" : 1766803000.24532,
+         "version" : "0.07"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "unknown",
+         "dir" : "/home/runner/work/XML-PP/XML-PP",
+         "finish" : 1766803000.59166,
+         "name" : "XML-PP",
+         "perl" : "5.40.3",
+         "run" : "t/collapse.t",
+         "start" : 1766803000.58884,
+         "version" : "0.07"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "unknown",
+         "dir" : "/home/runner/work/XML-PP/XML-PP",
+         "finish" : 1766803000.9284,
+         "name" : "XML-PP",
+         "perl" : "5.40.3",
+         "run" : "t/entities.t",
+         "start" : 1766803000.92252,
+         "version" : "0.07"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "unknown",
+         "dir" : "/home/runner/work/XML-PP/XML-PP",
+         "finish" : 1766803001.21562,
+         "name" : "XML-PP",
+         "perl" : "5.40.3",
+         "run" : "t/eof.t",
+         "start" : 1766803001.21532,
+         "version" : "0.07"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "unknown",
+         "dir" : "/home/runner/work/XML-PP/XML-PP",
+         "finish" : 1766803001.4518,
+         "name" : "XML-PP",
+         "perl" : "5.40.3",
+         "run" : "t/eol.t",
+         "start" : 1766803001.45152,
+         "version" : "0.07"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "unknown",
+         "dir" : "/home/runner/work/XML-PP/XML-PP",
+         "finish" : 1766803001.68961,
+         "name" : "XML-PP",
+         "perl" : "5.40.3",
+         "run" : "t/no404s.t",
+         "start" : 1766803001.68933,
+         "version" : "0.07"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "unknown",
+         "dir" : "/home/runner/work/XML-PP/XML-PP",
+         "finish" : 1766803001.97177,
+         "name" : "XML-PP",
+         "perl" : "5.40.3",
+         "run" : "t/parse.t",
+         "start" : 1766803001.96872,
+         "version" : "0.07"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "unknown",
+         "dir" : "/home/runner/work/XML-PP/XML-PP",
+         "finish" : 1766803002.25377,
+         "name" : "XML-PP",
+         "perl" : "5.40.3",
+         "run" : "t/pod-cm.t",
+         "start" : 1766803002.25349,
+         "version" : "0.07"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "unknown",
+         "dir" : "/home/runner/work/XML-PP/XML-PP",
+         "finish" : 1766803002.48817,
+         "name" : "XML-PP",
+         "perl" : "5.40.3",
+         "run" : "t/pod-coverage.t",
+         "start" : 1766803002.48787,
+         "version" : "0.07"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "unknown",
+         "dir" : "/home/runner/work/XML-PP/XML-PP",
+         "finish" : 1766803002.72198,
+         "name" : "XML-PP",
+         "perl" : "5.40.3",
+         "run" : "t/pod-synopsis.t",
+         "start" : 1766803002.7217,
+         "version" : "0.07"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "unknown",
+         "dir" : "/home/runner/work/XML-PP/XML-PP",
+         "finish" : 1766803002.955,
+         "name" : "XML-PP",
+         "perl" : "5.40.3",
+         "run" : "t/prereq.t",
+         "start" : 1766803002.95471,
+         "version" : "0.07"
+      }
+   ],
+   "summary" : {
+      "Total" : {
+         "branch" : {
+            "covered" : 50,
+            "error" : 22,
+            "percentage" : 69.4444444444444,
+            "total" : 72,
+            "uncoverable" : 0
+         },
+         "condition" : {
+            "covered" : 19,
+            "error" : 9,
+            "percentage" : 67.8571428571429,
+            "total" : 28,
+            "uncoverable" : 0
+         },
+         "statement" : {
+            "covered" : 117,
+            "error" : 21,
+            "percentage" : 84.7826086956522,
+            "total" : 138
+         },
+         "subroutine" : {
+            "covered" : 11,
+            "percentage" : 100,
+            "total" : 11
+         },
+         "total" : {
+            "covered" : 197,
+            "error" : 52,
+            "percentage" : 79.1164658634538,
+            "total" : 249,
+            "uncoverable" : 0
+         }
+      },
+      "blib/lib/XML/PP.pm" : {
+         "branch" : {
+            "covered" : 50,
+            "error" : 22,
+            "percentage" : 69.4444444444444,
+            "total" : 72,
+            "uncoverable" : 0
+         },
+         "condition" : {
+            "covered" : 19,
+            "error" : 9,
+            "percentage" : 67.8571428571429,
+            "total" : 28,
+            "uncoverable" : 0
+         },
+         "statement" : {
+            "covered" : 117,
+            "error" : 21,
+            "percentage" : 84.7826086956522,
+            "total" : 138
+         },
+         "subroutine" : {
+            "covered" : 11,
+            "percentage" : 100,
+            "total" : 11
+         },
+         "total" : {
+            "covered" : 197,
+            "error" : 52,
+            "percentage" : 79.1164658634538,
+            "total" : 249,
+            "uncoverable" : 0
+         }
+      }
+   }
+}
