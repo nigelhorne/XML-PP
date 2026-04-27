@@ -204,10 +204,6 @@ Children with no tag name (bare text nodes) are silently skipped.
 Attributes of child elements are not included in the collapsed output; use
 the raw tree from C<parse()> if attribute values are needed.
 
-=head3 Side effects
-
-None.
-
 =head3 Example
 
   use XML::PP;

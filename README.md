@@ -107,10 +107,6 @@ Children with no tag name (bare text nodes) are silently skipped.
 Attributes of child elements are not included in the collapsed output; use
 the raw tree from `parse()` if attribute values are needed.
 
-### Side effects
-
-None.
-
 ### Example
 
     use XML::PP;
