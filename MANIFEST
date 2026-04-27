@@ -8,6 +8,7 @@ MANIFEST			This list of files
 MANIFEST.SKIP
 README.md
 scripts/generate_index.pl
+t/00-load.t
 t/30-basics.t
 t/collapse.t
 t/edge_cases.t

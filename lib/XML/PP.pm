@@ -160,101 +160,118 @@ sub parse
 
 =head2 collapse_structure
 
-Collapse an XML-like structure into a simplified hash (like L<XML::Simple>).
+Collapses a parsed XML tree into a simplified nested hash,
+similar in spirit to L<XML::Simple>.
+It is designed to be called on the output of C<parse()>,
+and the two methods compose cleanly as a pipeline.
+
+=head3 Purpose
+
+Transforms the verbose node-and-children structure produced by C<parse()>
+into a compact hash that is easier to address with ordinary Perl hash
+syntax.
+Each element's tag name becomes a hash key and its text content becomes
+the corresponding value.
+Nested elements are recursed into rather than flattened.
+
+=head3 Arguments
+
+=over 4
+
+=item * C<$node> (required)
+
+A hash reference representing a parsed XML node,
+as returned by C<parse()>.
+Must contain a defined C<name> key and a C<children> array reference.
+Returns an empty hash reference immediately if any of the following are
+true: C<$node> is not a hash reference; C<$node> has no defined C<name>
+key; C<$node> has no C<children> key.
+
+=back
+
+=head3 Returns
+
+A hash reference whose single top-level key is the element's tag name.
+Its value is a hash of collapsed children where each child's tag name maps
+to its text content or to a recursively collapsed sub-hash.
+
+If two or more children share the same tag name their values are collected
+into an array reference in document order rather than overwriting each other.
+
+Children whose text content is undefined or the empty string are silently
+omitted.
+Children with no tag name (bare text nodes) are silently skipped.
+Attributes of child elements are not included in the collapsed output; use
+the raw tree from C<parse()> if attribute values are needed.
+
+=head3 Side effects
+
+None.
+
+=head3 Example
 
   use XML::PP;
 
-  my $input = {
-      name => 'note',
-      children => [
-          { name => 'to', children => [ { text => 'Tove' } ] },
-          { name => 'from', children => [ { text => 'Jani' } ] },
-          { name => 'heading', children => [ { text => 'Reminder' } ] },
-          { name => 'body', children => [ { text => 'Don\'t forget me this weekend!' } ] },
-      ],
-      attributes => { id => 'n1' },
-  };
+  my $parser = XML::PP->new();
+  my $xml    = '<note id="1">'
+             .   '<to>Tove</to>'
+             .   '<from>Jani</from>'
+             .   '<heading>Reminder</heading>'
+             .   '<body>Don\'t forget me this weekend!</body>'
+             . '</note>';
 
-  my $result = collapse_structure($input);
+  my $tree   = $parser->parse($xml);
+  my $result = $parser->collapse_structure($tree);
 
-  # Output:
-  # {
+  # $result = {
   #     note => {
   #         to      => 'Tove',
   #         from    => 'Jani',
   #         heading => 'Reminder',
-  #         body    => 'Don\'t forget me this weekend!',
+  #         body    => "Don't forget me this weekend!",
   #     }
   # }
 
-The C<collapse_structure> subroutine takes a nested hash structure (representing an XML-like data structure) and collapses it into a simplified hash where each child element is mapped to its name as the key, and the text content is mapped as the corresponding value. The final result is wrapped in a C<note> key, which contains a hash of all child elements.
+  print $result->{note}{to};       # Tove
+  print $result->{note}{heading};  # Reminder
 
-This subroutine is particularly useful for flattening XML-like data into a more manageable hash format, suitable for further processing or display.
+  # Repeated child elements become an array reference:
+  my $list   = $parser->parse('<list><item>a</item><item>b</item></list>');
+  my $flat   = $parser->collapse_structure($list);
+  print $flat->{list}{item}[0];    # a
+  print $flat->{list}{item}[1];    # b
 
-C<collapse_structure> accepts a single argument:
+=head3 API specification
 
-=over 4
-
-=item * C<$node> (Required)
-
-A hash reference representing a node with the following structure:
-
-  {
-      name      => 'element_name',  # Name of the element (e.g., 'note', 'to', etc.)
-      children  => [                # List of child elements
-          { name => 'child_name', children => [{ text => 'value' }] },
-          ...
-      ],
-      attributes => { ... },        # Optional attributes for the element
-      ns_uri => ... ,               # Optional namespace URI
-      ns => ... ,                   # Optional namespace
-  }
-
-The C<children> key holds an array of child elements. Each child element may have its own C<name> and C<text>, and the function will collapse all text values into key-value pairs.
-
-=back
-
-The subroutine returns a hash reference that represents the collapsed structure, where the top-level key is C<note> and its value is another hash containing the child elements' names as keys and their corresponding text values as values.
-
-For example:
+=head4 Input
 
   {
-      note => {
-          to      => 'Tove',
-          from    => 'Jani',
-          heading => 'Reminder',
-          body    => 'Don\'t forget me this weekend!',
-      }
+      node => {
+          type      => HASHREF,
+          required  => 1,
+          callbacks => {
+              'has defined name key' => sub {
+                  ref $_[0] eq 'HASH' && defined $_[0]->{name}
+              },
+              'has children key' => sub {
+                  ref $_[0] eq 'HASH' && exists $_[0]->{children}
+              },
+          },
+      },
   }
 
-=over 4
-
-=item Basic Example:
-
-Given the following input structure:
-
-  my $input = {
-      name => 'note',
-      children => [
-          { name => 'to', children => [ { text => 'Tove' } ] },
-          { name => 'from', children => [ { text => 'Jani' } ] },
-          { name => 'heading', children => [ { text => 'Reminder' } ] },
-          { name => 'body', children => [ { text => 'Don\'t forget me this weekend!' } ] },
-      ],
-  };
-
-Calling C<collapse_structure> will return:
+=head4 Output
 
   {
-      note => {
-          to      => 'Tove',
-          from    => 'Jani',
-          heading => 'Reminder',
-          body    => 'Don\'t forget me this weekend!',
-      }
+      type => HASHREF,
+      min  => 1,
   }
 
-=back
+The returned hash reference always has exactly one top-level key (the root
+element's tag name) whose value is a plain hash reference of collapsed
+children.
+An empty hash reference C<{}> is returned when the input fails the guard
+conditions.
 
 =cut
 
@@ -431,6 +448,9 @@ sub _parse_node {
 
 		# Recurse to parse the next child element
 		my $child = $self->_parse_node($xml_ref, \%local_nsmap);
+
+		# $child should never be undef here since the while lookahead and the
+		# inner s/// use equivalent patterns; the guard is retained defensively
 		push @{ $node->{children} }, $child if $child;
 	}
 
@@ -500,6 +520,7 @@ sub _decode_entities {
 
 	return $text;
 }
+
 # _handle_error($message)
 #
 # Purpose:
@@ -510,7 +531,7 @@ sub _decode_entities {
 #   $message - a plain-text description of the error; must not be undef
 #
 # Exit status:
-#   Returns nothing meaningful.
+#   Returns self (chainable)
 #   Dies (via croak) if strict mode is enabled.
 #   Otherwise returns normally after warning or logging.
 #
@@ -549,6 +570,8 @@ sub _handle_error {
 			print STDERR "Warning: $error_message\n";
 		}
 	}
+
+	return $self;
 }
 
 =head1 AUTHOR
