@@ -1,6 +1,6 @@
 Revision history for XML-PP
 
-0.08
+0.08	Mon Apr 27 19:55:33 EDT 2026
 
 	- Fixed parse() returning a non-empty hashref instead of {} for inputs
           that contain only whitespace, only an XML declaration, or only comments;
