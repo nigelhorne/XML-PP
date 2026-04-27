@@ -3,6 +3,7 @@ package XML::PP;
 use strict;
 use warnings;
 
+use Carp qw(carp croak);
 use Params::Get 0.13;
 use Scalar::Util;
 use Return::Set;
@@ -92,7 +93,7 @@ sub new
 			#	Log::Abstraction->Config::Abstraction->XML::PP
 			eval { require Log::Abstraction };
 			if($@) {
-				die $@;
+				croak $@;
 			}
 			Log::Abstraction->import();
 			$self->{'logger'} = Log::Abstraction->new($logger);
@@ -144,7 +145,8 @@ sub parse
 	}
 
 	$xml_string =~ s/<!--.*?-->//sg;	# Ignore comments
-	$xml_string =~ s/<\?xml.+\?>//;	# Ignore the header
+	# .*? is lazy; avoids over-consuming if multiple ?> sequences exist on the line
+	$xml_string =~ s/<\?xml.*?\?>//;	# Ignore the XML declaration header
 
 	$xml_string =~ s/^\s+|\s+$//g;	# Trim whitespace
 	# Check if the XML string is empty
@@ -253,9 +255,6 @@ Calling C<collapse_structure> will return:
 
 sub collapse_structure {
 	my ($self, $node) = @_;
-	# my $self = shift;
-	# my $params = Params::Get::get_params('node', \@_);
-	# my $node = $params->{'node'};
 
 	return {} unless ref $node eq 'HASH' && $node->{children};
 
@@ -285,18 +284,39 @@ sub collapse_structure {
 	return { $node->{name} => \%result };
 }
 
-=head2 _parse_node
-
-  my $node = $self->_parse_node($xml_ref, $nsmap);
-
-Recursively parses an individual XML node.
-This method is used internally by the C<parse> method.
-It handles the parsing of tags, attributes, text nodes, and child elements.
-It also manages namespaces and handles self-closing tags.
-
-=cut
-
-# Internal method to parse an individual XML node
+# _parse_node($xml_ref, $nsmap)
+#
+# Purpose:
+#   Recursively parses a single XML node from the front of the string
+#   referenced by $xml_ref, building and returning a tree of hash nodes.
+#
+# Entry criteria:
+#   $xml_ref  - scalar ref to the remaining unparsed XML string; consumed
+#               in-place as tags and text are matched and stripped
+#   $nsmap    - hash ref of namespace prefix => URI mappings inherited from
+#               the parent node; must not be undef (pass {} at the root)
+#
+# Exit status:
+#   Returns a hash ref representing the parsed node:
+#     {
+#       name       => $tag,        # local tag name (namespace prefix stripped)
+#       ns         => $prefix,     # namespace prefix, or undef if none
+#       ns_uri     => $uri,        # resolved namespace URI, or undef if none
+#       attributes => \%attrs,     # decoded attribute key/value pairs
+#       children   => \@children,  # text nodes ({ text => $str }) and child
+#                                  # element nodes (recursive _parse_node results)
+#     }
+#   Returns undef if the opening tag regex fails to match.
+#
+# Side effects:
+#   Modifies $$xml_ref in-place, consuming the matched node and its closing tag.
+#
+# Notes:
+#   Namespace declarations (xmlns:prefix="uri") are extracted from the attribute
+#   string and merged into a local copy of $nsmap for child nodes; they are not
+#   included in the returned attributes hash.
+#   Closing-tag namespace prefix is accepted without verifying it matches the
+#   opening prefix — intentional given the lightweight scope of this module.
 sub _parse_node {
 	my ($self, $xml_ref, $nsmap) = @_;
 
@@ -304,7 +324,7 @@ sub _parse_node {
 		if($self->{'logger'}) {
 			$self->{'logger'}->fatal('BUG: _parse_node, xml_ref not defined');
 		}
-		die 'BUG: _parse_node, xml_ref not defined';
+		croak 'BUG: _parse_node, xml_ref not defined';
 	}
 
 	# Match the start of a tag (self-closing or regular)
@@ -315,9 +335,17 @@ sub _parse_node {
 
 	my ($raw_tag, $attr_string, $self_close) = ($1, $2 || '', $3);
 
-	# Check for malformed self-closing tags
-	if($self_close && $$xml_ref !~ /^\s*<\/(?:\w+:)?$raw_tag\s*>/) {
-		$self->_handle_error("Malformed self-closing tag for <$raw_tag>");
+	# The main regex's [^>]* greedily consumes any trailing '/', so $self_close
+	# from capture group 3 is always empty; detect self-closing tags via attr_string
+	# e.g. <line break="yes"/> or <br/>
+	if($attr_string =~ s{/\s*$}{}) {
+		$self_close = 1;
+	}
+
+	# A self-closing tag is malformed if a redundant closing tag immediately follows;
+	# e.g. <br/></br> is invalid XML — flag it and bail out
+	if($self_close && $$xml_ref =~ /^\s*<\/(?:\w+:)?$raw_tag\s*>/) {
+		$self->_handle_error("Malformed self-closing tag: redundant closing tag found for <$raw_tag/>");
 		return;
 	}
 
@@ -358,11 +386,10 @@ sub _parse_node {
 	}
 
 	my %attributes;
-	pos($attr_string) = 0;
 
 	# Accept name="value" and name='value' (value captured lazily, same quote used to open/close)
 	# Attribute name follows XML Name-ish rules: start with letter/underscore/colon, then letters/digits/._:-
-	while ($attr_string =~ /([A-Za-z_:][-A-Za-z0-9_.:]*)\s*=\s*(['"])(.*?)\2/g) {
+	while($attr_string =~ /([A-Za-z_:][-A-Za-z0-9_.:]*)\s*=\s*(['"])(.*?)\2/g) {
 		my ($attr, $quote, $v) = ($1, $2, $3);
 
 		# Skip xmlns declarations (already handled)
@@ -396,13 +423,37 @@ sub _parse_node {
 		push @{ $node->{children} }, $child if $child;
 	}
 
-	# Consume closing tag
+	# Strip the closing tag; any namespace prefix is accepted without verifying it
+	# matches the opening prefix — lightweight scope of this module makes that acceptable
 	$$xml_ref =~ s{^\s*</(?:\w+:)?$tag\s*>}{}s;
 
 	return Return::Set::set_return($node, { 'type' => 'hashref', 'min' => 1 });
 }
 
-# Internal helper to decode XML entities
+# _decode_entities($text)
+#
+# Purpose:
+#   Decodes XML character and entity references in a string, converting them
+#   to their literal UTF-8 character equivalents.
+#
+# Entry criteria:
+#   $text - the string to decode; may be undef, in which case undef is returned
+#
+# Exit status:
+#   Returns the decoded string with all recognised entities replaced.
+#   Returns undef if $text is undef.
+#
+# Side effects:
+#   Calls _handle_error() if an unknown named entity or an unescaped ampersand
+#   is encountered; depending on the strict/warn_on_error settings this may
+#   die, warn, or log silently.
+#
+# Notes:
+#   Handles the five predefined XML named entities: &lt; &gt; &amp; &quot; &apos;
+#   Handles decimal numeric references (&#nnnn;) and hex numeric references
+#   (&#xhhhh;).  All other named entities are treated as unknown and trigger
+#   _handle_error().  Unescaped ampersands that survive entity decoding are
+#   also flagged via _handle_error().
 sub _decode_entities {
 	my ($self, $text) = @_;
 
@@ -437,6 +488,30 @@ sub _decode_entities {
 	return $text;
 }
 
+# _handle_error($message)
+#
+# Purpose:
+#   Centralised error handler for XML parsing failures; routes the error to
+#   the appropriate output channel based on the object's configuration.
+#
+# Entry criteria:
+#   $message - a plain-text description of the error; must not be undef
+#
+# Exit status:
+#   Returns nothing meaningful.
+#   Dies (via croak) if strict mode is enabled.
+#   Otherwise returns normally after warning or logging.
+#
+# Side effects:
+#   strict mode enabled    : logs as fatal via logger (if present) then dies
+#   warn_on_error enabled  : logs as warn via logger (if present) or carps
+#   neither flag set       : logs as notice via logger (if present) or prints
+#                            a warning to STDERR
+#
+# Notes:
+#   The emitted message is prefixed with the package name and the string
+#   "XML Parsing Error:" for consistent identification in logs.
+#   strict mode implies warn_on_error, enforced at construction time in new().
 sub _handle_error {
 	my ($self, $message) = @_;
 
@@ -447,13 +522,13 @@ sub _handle_error {
 		if($self->{'logger'}) {
 			$self->{'logger'}->fatal($error_message);
 		}
-		die $error_message;
+		croak $error_message;
 	} elsif ($self->{warn_on_error}) {
 		# Otherwise, just warn
 		if($self->{'logger'}) {
 			$self->{'logger'}->warn($error_message);
 		} else {
-			warn $error_message;
+			carp $error_message;
 		}
 	} else {
 		if($self->{'logger'}) {
@@ -484,23 +559,13 @@ Nigel Horne, C<< <njh at nigelhorne.com> >>
 
 This module is provided as-is without any warranty.
 
-=head1 LICENSE AND COPYRIGHT
+=head1 LICENCE AND COPYRIGHT
 
-Copyright 2025 Nigel Horne.
+Copyright 2025-2026 Nigel Horne.
 
-Usage is subject to licence terms.
-
-The licence terms of this software are as follows:
-
-=over 4
-
-=item * Personal single user, single computer use: GPL2
-
-=item * All other users (including Commercial, Charity, Educational, Government)
-  must apply in writing for a licence for use from Nigel Horne at the
-  above e-mail.
-
-=back
+Usage is subject to GPL2 licence terms.
+If you use it,
+please let me know.
 
 =cut
 

@@ -1,5 +1,24 @@
 Revision history for XML-PP
 
+0.08
+
+        - Fixed unreachable self-closing tag guard in _parse_node: the check ran
+          before $self_close was set, so it could never fire; moved to after the
+          attr_string strip block that actually sets the flag
+        - Fixed inverted condition in self-closing tag guard: previously errored
+          when no closing tag was present (the valid case); now correctly errors
+          when a redundant closing tag follows a self-closing tag
+        - Improved error message for malformed self-closing tags to state
+          explicitly that a redundant closing tag was found
+        - Fixed greedy regex in parse(): s/<\?xml.+\?>//  changed to
+          s/<\?xml.*?\?>//  to avoid over-consuming if multiple ?> sequences
+          appear on the XML declaration line
+        - Removed no-op pos($attr_string) = 0 in _parse_node: pos() is always
+          undef at the start of a fresh //g match on a new variable
+        - Added comment to closing-tag namespace strip in _parse_node documenting
+          that prefix mismatch between open and close tags is not verified, which
+          is intentional given the lightweight scope of this module
+
 0.07	Fri Dec 26 21:32:41 EST 2025
 	Use Return::Set to verify correct output type
 	Ignore comments in the XML

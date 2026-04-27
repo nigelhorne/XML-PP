@@ -11,6 +11,7 @@ requires 'Scalar::Util';
 on 'configure' => sub {
 	requires 'ExtUtils::MakeMaker', '6.64';
 };
+
 on 'test' => sub {
 	requires 'Data::Dumper';
 	requires 'Test::DescribeMe';
@@ -18,6 +19,7 @@ on 'test' => sub {
 	requires 'Test::Needs';
 	requires 'Test::Returns';
 };
+
 on 'develop' => sub {
 	requires 'Devel::Cover';
 	requires 'Perl::Critic';

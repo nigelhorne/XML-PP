@@ -27,6 +27,7 @@ WriteMakefile(
 	clean => { FILES => 'XML-PP-*' },
 	dist => $dist,
 	PREREQ_PM => {
+		'Carp' => 0,
 		'Getopt::Long' => 0,
 		'Params::Get' => 0.13,
 		'Pod::Usage' => 0,
