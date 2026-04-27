@@ -36,6 +36,7 @@ WriteMakefile(
 	}, TEST_REQUIRES => {
 		'Data::Dumper' => 0,
 		'Test::DescribeMe' => 0,
+		'Test::Mockingbird' => 0.08,
 		'Test::Most' => 0,
 		'Test::Needs' => 0,
 		'Test::Returns' => 0

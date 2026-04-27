@@ -11,7 +11,7 @@ use Test::More;
 use Test::Mockingbird 0.08;
 use Readonly;
 
-use XML::PP;
+use_ok('XML::PP');
 
 Readonly::Scalar my $CLASS => 'XML::PP';
 
@@ -21,9 +21,8 @@ END { done_testing() }
 # new()
 # ================================================================
 subtest 'new()' => sub {
-
 	subtest 'returns a blessed XML::PP object with no args' => sub {
-		my $obj = $CLASS->new();
+		my $obj = new_ok($CLASS);
 		isa_ok($obj, $CLASS, 'no-arg construction returns an XML::PP object');
 	};
 
