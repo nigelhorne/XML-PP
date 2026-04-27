@@ -155,15 +155,6 @@ For example:
             }
         }
 
-## \_parse\_node
-
-    my $node = $self->_parse_node($xml_ref, $nsmap);
-
-Recursively parses an individual XML node.
-This method is used internally by the `parse` method.
-It handles the parsing of tags, attributes, text nodes, and child elements.
-It also manages namespaces and handles self-closing tags.
-
 # AUTHOR
 
 Nigel Horne, `<njh at nigelhorne.com>`
@@ -178,15 +169,10 @@ Nigel Horne, `<njh at nigelhorne.com>`
 
 This module is provided as-is without any warranty.
 
-# LICENSE AND COPYRIGHT
+# LICENCE AND COPYRIGHT
 
-Copyright 2025 Nigel Horne.
+Copyright 2025-2026 Nigel Horne.
 
-Usage is subject to licence terms.
-
-The licence terms of this software are as follows:
-
-- Personal single user, single computer use: GPL2
-- All other users (including Commercial, Charity, Educational, Government)
-  must apply in writing for a licence for use from Nigel Horne at the
-  above e-mail.
+Usage is subject to GPL2 licence terms.
+If you use it,
+please let me know.

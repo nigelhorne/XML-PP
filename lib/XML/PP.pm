@@ -148,8 +148,13 @@ sub parse
 	# .*? is lazy; avoids over-consuming if multiple ?> sequences exist on the line
 	$xml_string =~ s/<\?xml.*?\?>//;	# Ignore the XML declaration header
 
-	$xml_string =~ s/^\s+|\s+$//g;	# Trim whitespace
-	# Check if the XML string is empty
+	$xml_string =~ s/<!--.*?-->//sg;	# Strip comments
+	$xml_string =~ s/<\?xml.*?\?>//;	# Strip XML declaration
+	$xml_string =~ s/^\s+|\s+$//g;		# Trim surrounding whitespace
+
+	# Re-check after preprocessing: comments/declaration/whitespace may have consumed everything
+	return {} unless length($xml_string);
+
 	return $self->_parse_node(\$xml_string, {});
 }
 
@@ -256,31 +261,42 @@ Calling C<collapse_structure> will return:
 sub collapse_structure {
 	my ($self, $node) = @_;
 
-	return {} unless ref $node eq 'HASH' && $node->{children};
+	# Guard against missing name, missing children, or a non-hash-ref input;
+	# children must be a reference (empty arrayref is still valid)
+	return {} unless ref $node eq 'HASH'
+		&& defined $node->{name}
+		&& $node->{children};
 
 	my %result;
 	for my $child (@{ $node->{children} }) {
+		# Skip any node that has no name (e.g. bare text nodes)
 		my $name = $child->{name} or next;
 		my $value;
 
-		if ($child->{children} && @{ $child->{children} }) {
-			if (@{ $child->{children} } == 1 && exists $child->{children}[0]{text}) {
+		if($child->{children} && @{ $child->{children} }) {
+			if(@{ $child->{children} } == 1 && exists $child->{children}[0]{text}) {
+				# Single text child: map name => text directly
 				$value = $child->{children}[0]{text};
 			} else {
+				# Multiple or non-text children: recurse and unwrap the result
 				$value = $self->collapse_structure($child)->{$name};
 			}
 		}
 
+		# Skip children whose text is undefined or the empty string;
+		# note: "0" is a valid value and must not be skipped
 		next unless defined $value && $value ne '';
 
-		# Handle multiple same-name children as an array
-		if (exists $result{$name}) {
+		# Promote duplicate same-name siblings to an arrayref in document order
+		if(exists $result{$name}) {
 			$result{$name} = [ $result{$name} ] unless ref $result{$name} eq 'ARRAY';
 			push @{ $result{$name} }, $value;
 		} else {
 			$result{$name} = $value;
 		}
 	}
+
+	# Wrap the collapsed hash under the root element name
 	return { $node->{name} => \%result };
 }
 
@@ -320,17 +336,19 @@ sub collapse_structure {
 sub _parse_node {
 	my ($self, $xml_ref, $nsmap) = @_;
 
+	# Programmer error: xml_ref must always be a defined scalar ref
 	if(!defined($xml_ref)) {
 		if($self->{'logger'}) {
 			$self->{'logger'}->fatal('BUG: _parse_node, xml_ref not defined');
 		}
-		croak 'BUG: _parse_node, xml_ref not defined';
+		die 'BUG: _parse_node, xml_ref not defined';
 	}
 
-	# Match the start of a tag (self-closing or regular)
+	# Match the start of a tag; capture tag name, attribute string, and
+	# any trailing slash that would indicate a self-closing tag
 	$$xml_ref =~ s{^\s*<([^\s/>]+)([^>]*)\s*(/?)>}{}s or do {
-		# pos() returns undef when no //g match has run; default to 0 for the message
-		$self->_handle_error('Expected a valid XML tag, but none found at position: ' . (pos($$xml_ref) // 0));
+		$self->_handle_error('Expected a valid XML tag, but none found at position: '
+			. (pos($$xml_ref) // 0));
 		return;
 	};
 
@@ -338,95 +356,90 @@ sub _parse_node {
 
 	# The main regex's [^>]* greedily consumes any trailing '/', so $self_close
 	# from capture group 3 is always empty; detect self-closing tags via attr_string
-	# e.g. <line break="yes"/> or <br/>
 	if($attr_string =~ s{/\s*$}{}) {
 		$self_close = 1;
 	}
 
 	# A self-closing tag is malformed if a redundant closing tag immediately follows;
-	# e.g. <br/></br> is invalid XML — flag it and bail out
+	# e.g. <br/></br> is invalid XML
 	if($self_close && $$xml_ref =~ /^\s*<\/(?:\w+:)?$raw_tag\s*>/) {
-		$self->_handle_error("Malformed self-closing tag: redundant closing tag found for <$raw_tag/>");
+		$self->_handle_error(
+			"Malformed self-closing tag: redundant closing tag found for <$raw_tag/>");
 		return;
 	}
 
-	# Handle possible trailing slash like <line break="yes"/>
-	if($attr_string =~ s{/\s*$}{}) {
-		$self_close = 1;
-	}
-
+	# Split the raw tag into optional namespace prefix and local name
 	my ($ns, $tag) = $raw_tag =~ /^([^:]+):(.+)$/
 		? ($1, $2)
 		: (undef, $raw_tag);
 
+	# Build a local namespace map inheriting from the parent scope
 	my %local_nsmap = (%$nsmap);
 
-	# XMLNS declarations
-	while ($attr_string =~ /(\w+)(?::(\w+))?="([^"]*)"/g) {
+	# Extract xmlns declarations and add them to the local namespace map
+	while($attr_string =~ /(\w+)(?::(\w+))?="([^"]*)"/g) {
 		my ($k1, $k2, $v) = ($1, $2, $3);
-		if ($k1 eq 'xmlns' && !defined $k2) {
+		if($k1 eq 'xmlns' && !defined $k2) {
 			$local_nsmap{''} = $v;
-		} elsif ($k1 eq 'xmlns' && defined $k2) {
+		} elsif($k1 eq 'xmlns' && defined $k2) {
 			$local_nsmap{$k2} = $v;
 		}
 	}
 
-	# Normalize whitespace between attributes but not inside quotes
-	# - Collapse run of whitespace to one space
-	# - Remove leading/trailing whitespace
-	# - Preserve quoted attribute values
+	# Normalise whitespace between attributes without touching quoted values;
+	# collapse runs of whitespace outside quotes to a single space
 	{
-		my $tmp = $attr_string;
-
-		# Replace all whitespace sequences outside of quotes with a single space
-		# This works because it alternates: quoted | non-quoted
+		my $tmp   = $attr_string;
 		my @parts = $tmp =~ /"[^"]*"|'[^']*'|[^\s"'']+/g;
-
-		# Rejoin non-quoted segments with a single space
 		$attr_string = join(' ', @parts);
 	}
 
 	my %attributes;
 
-	# Accept name="value" and name='value' (value captured lazily, same quote used to open/close)
-	# Attribute name follows XML Name-ish rules: start with letter/underscore/colon, then letters/digits/._:-
-	while($attr_string =~ /([A-Za-z_:][-A-Za-z0-9_.:]*)\s*=\s*(['"])(.*?)\2/g) {
-		my ($attr, $quote, $v) = ($1, $2, $3);
-
-		# Skip xmlns declarations (already handled)
+	# Parse name="value" and name='value' attribute pairs; /s lets .*? cross newlines
+	# inside quoted values; skip xmlns declarations already handled above
+	while($attr_string =~ /([A-Za-z_:][-A-Za-z0-9_.:]*)\s*=\s*(['"])(.*?)\2/gs) {
+		my ($attr, undef, $v) = ($1, $2, $3);
 		next if $attr =~ /^xmlns(?::|$)/;
-
-		# Decode XML entities inside attribute values
 		$attributes{$attr} = $self->_decode_entities($v);
 	}
 
 	my $node = {
-		name => $tag,
-		ns => $ns,
-		ns_uri => defined $ns ? $local_nsmap{$ns} : undef,
+		name       => $tag,
+		ns         => $ns,
+		ns_uri     => defined $ns ? $local_nsmap{$ns} : undef,
 		attributes => \%attributes,
-		children => [],
+		children   => [],
 	};
 
-	# Return immediately if self-closing tag
+	# Self-closing tags have no content or children
 	return $node if $self_close;
 
-	# Capture text
-	if ($$xml_ref =~ s{^([^<]+)}{}s) {
-		my $text = $self->_decode_entities($1);
-		$text =~ s/^\s+|\s+$//g;
-		push @{ $node->{children} }, { text => $text } if $text ne '';
-	}
+	# Parse text nodes and child elements interleaved to handle mixed content;
+	# a single pre-loop text capture would miss text between sibling elements
+	while(1) {
+		# Consume any text preceding the next tag (covers mixed content between siblings)
+		if($$xml_ref =~ s{^([^<]+)}{}s) {
+			my $text = $self->_decode_entities($1);
+			$text =~ s/^\s+|\s+$//g;
+			# Whitespace-only text nodes are discarded
+			push @{ $node->{children} }, { text => $text } if $text ne '';
+		}
 
-	# Recursively parse children
-	while ($$xml_ref =~ /^\s*<([^\/>"][^>]*)>/) {
+		# Stop when the next token is a closing tag, a self-closer, or end of input
+		last unless $$xml_ref =~ /^\s*<([^\/>"][^>]*)>/;
+
+		# Recurse to parse the next child element
 		my $child = $self->_parse_node($xml_ref, \%local_nsmap);
 		push @{ $node->{children} }, $child if $child;
 	}
 
-	# Strip the closing tag; any namespace prefix is accepted without verifying it
-	# matches the opening prefix — lightweight scope of this module makes that acceptable
-	$$xml_ref =~ s{^\s*</(?:\w+:)?$tag\s*>}{}s;
+	# Consume the closing tag; flag it if absent or mismatched
+	unless($$xml_ref =~ s{^\s*</(?:\w+:)?$tag\s*>}{}s) {
+		# Closing-tag prefix is not verified against the opening prefix — intentional
+		# given the lightweight scope of this module
+		$self->_handle_error("Missing or mismatched closing tag for <$tag>");
+	}
 
 	return Return::Set::set_return($node, { 'type' => 'hashref', 'min' => 1 });
 }

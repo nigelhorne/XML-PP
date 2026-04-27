@@ -2,6 +2,7 @@
 
 requires 'perl', '5.008';
 
+requires 'Carp';
 requires 'Getopt::Long';
 requires 'Params::Get', '0.13';
 requires 'Pod::Usage';
@@ -14,7 +15,9 @@ on 'configure' => sub {
 
 on 'test' => sub {
 	requires 'Data::Dumper';
+	requires 'Readonly';
 	requires 'Test::DescribeMe';
+	requires 'Test::Mockingbird', '0.08';
 	requires 'Test::Most';
 	requires 'Test::Needs';
 	requires 'Test::Returns';

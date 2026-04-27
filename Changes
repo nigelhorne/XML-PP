@@ -2,6 +2,23 @@ Revision history for XML-PP
 
 0.08
 
+	- Fixed parse() returning a non-empty hashref instead of {} for inputs
+          that contain only whitespace, only an XML declaration, or only comments;
+          the empty-string guard now re-checks after preprocessing strips those
+          constructs rather than only checking the raw input
+        - Fixed _parse_node attribute-value regex not matching newlines inside
+          quoted attribute values; added /s flag so .*? crosses line boundaries
+        - Fixed _parse_node only capturing text content before the first child
+          element; mixed content with text between sibling elements (e.g.
+          <p>Hello<br/>World</p>) was silently lost; the text-capture step is now
+          inside the child-parsing loop so it runs between every pair of siblings
+        - Fixed collapse_structure producing { "" => {} } with an uninitialised-
+          value warning when the input node has no name key; the entry guard now
+          checks defined $node->{name} before proceeding
+        - Fixed _parse_node silently ignoring missing and mismatched closing tags
+          even in strict mode; the closing-tag substitution result is now checked
+          and routes through _handle_error, so strict mode dies and warn_on_error
+          mode warns as expected
         - Fixed unreachable self-closing tag guard in _parse_node: the check ran
           before $self_close was set, so it could never fire; moved to after the
           attr_string strip block that actually sets the flag
