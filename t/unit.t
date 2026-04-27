@@ -53,13 +53,24 @@ subtest 'new()' => sub {
 	};
 
 	subtest 'accepts a coderef logger' => sub {
-		# POD: logger may be a reference to code
+		# Log::Abstraction may be absent due to the circular dependency
+		# XML::PP -> Log::Abstraction -> Config::Abstraction -> XML::PP
+		eval { require Log::Abstraction };
+		if($@) {
+			plan skip_all => 'Log::Abstraction not installed; skipping coderef logger test';
+			return;
+		}
 		my $obj = $CLASS->new(logger => sub { });
 		isa_ok($obj, $CLASS, 'construction with coderef logger succeeds');
 	};
 
 	subtest 'accepts an arrayref logger' => sub {
-		# POD: logger may be a reference to an array
+		# Same circular dependency caveat as above
+		eval { require Log::Abstraction };
+		if($@) {
+			plan skip_all => 'Log::Abstraction not installed; skipping arrayref logger test';
+			return;
+		}
 		my $obj = $CLASS->new(logger => []);
 		isa_ok($obj, $CLASS, 'construction with arrayref logger succeeds');
 	};
