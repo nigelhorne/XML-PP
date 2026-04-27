@@ -329,7 +329,8 @@ sub _parse_node {
 
 	# Match the start of a tag (self-closing or regular)
 	$$xml_ref =~ s{^\s*<([^\s/>]+)([^>]*)\s*(/?)>}{}s or do {
-		$self->_handle_error('Expected a valid XML tag, but none found at position: ' . pos($$xml_ref));
+		# pos() returns undef when no //g match has run; default to 0 for the message
+		$self->_handle_error('Expected a valid XML tag, but none found at position: ' . (pos($$xml_ref) // 0));
 		return;
 	};
 
@@ -459,35 +460,33 @@ sub _decode_entities {
 
 	return undef unless defined $text;
 
-	# Decode known named entities
+	# Check for unescaped bare ampersands before any decoding, so that
+	# legitimately encoded &amp; sequences do not trigger a false positive
+	if ($text =~ /&(?![a-zA-Z#][^;]*;)/) {
+		$self->_handle_error("Unescaped ampersand detected: $text");
+	}
+
+	# Decode the five predefined named entities
 	$text =~ s/&lt;/</g;
 	$text =~ s/&gt;/>/g;
 	$text =~ s/&amp;/&/g;
 	$text =~ s/&quot;/"/g;
 	$text =~ s/&apos;/'/g;
 
-	# Decode decimal numeric entities
+	# Decode decimal and hex numeric character references
 	$text =~ s/&#(\d+);/chr($1)/eg;
-
-	# Decode hex numeric entities
 	$text =~ s/&#x([0-9a-fA-F]+);/chr(hex($1))/eg;
 
+	# Flag any remaining unrecognised named entities
 	if ($text =~ /&([^;]*);/) {
 		my $entity = $1;
 		unless ($entity =~ /^(lt|gt|amp|quot|apos)$/ || $entity =~ /^#(?:x[0-9a-fA-F]+|\d+)$/) {
-			my $msg = "Unknown or malformed XML entity: &$entity;";
-			$self->_handle_error($msg);
+			$self->_handle_error("Unknown or malformed XML entity: &$entity;");
 		}
-	}
-
-	if ($text =~ /&/) {
-		my $msg = "Unescaped ampersand detected: $text";
-		$self->_handle_error($msg);
 	}
 
 	return $text;
 }
-
 # _handle_error($message)
 #
 # Purpose:
