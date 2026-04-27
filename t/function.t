@@ -7,11 +7,11 @@
 use strict;
 use warnings;
 
-use Test::More;
+use Test::Most;
 use Test::Mockingbird 0.08;
 use Readonly;
 
-use XML::PP;
+use_ok('XML::PP');
 
 # ================================================================
 # Shared constants
@@ -23,11 +23,10 @@ Readonly::Scalar my $TEST_ERR  => 'something went wrong';
 # new()
 # ================================================================
 subtest 'new()' => sub {
-
 	subtest 'default construction' => sub {
 		# Mock get_params so the constructor receives an empty param set
 		mock_scoped('Params::Get' => 'get_params' => sub { return {} });
-		my $obj = $CLASS->new();
+		my $obj = new_ok($CLASS);
 		# Verify the object is correctly blessed and carries no flags
 		isa_ok($obj, $CLASS,         'returns a blessed XML::PP object');
 		ok(!$obj->{strict},          'strict defaults to false');
