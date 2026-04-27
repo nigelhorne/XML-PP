@@ -255,9 +255,19 @@ subtest 'warn_on_error mode emits warnings rather than dying' => sub {
 # Logger integration (Log::Abstraction)
 # ================================================================
 subtest 'logger integration with Log::Abstraction' => sub {
+	# Skip the entire block if Log::Abstraction is not yet installed;
+	# the circular dependency XML::PP -> Log::Abstraction ->
+	# Config::Abstraction -> XML::PP means it may legitimately be absent
+	# on a fresh install or CI machine building XML::PP first
+	eval { require Log::Abstraction };
+	if($@) {
+		plan skip_all => 'Log::Abstraction not installed; skipping logger integration tests';
+		return;
+	}
 
 	subtest 'coderef logger receives warn messages' => sub {
 		my @messages;
+		# POD: logger may be a reference to code
 		my $parser = $CLASS->new(
 			warn_on_error => 1,
 			logger        => sub { push @messages, @_ },
